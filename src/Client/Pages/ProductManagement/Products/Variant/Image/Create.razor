@@ -1,0 +1,41 @@
+@page "/{companySlug}/product/{productNo}/variant/{variantNo}/image/create"
+@using ServiceManager.Client.Components.Product
+@inject NavigationManager NavigationManager
+@inject HttpClient client
+@using ServiceManager.Client.Shared.PIM
+@layout PIMLayout
+
+<VariantImageForm VariantImage="@variantImage" OnValidSubmit="@CreateVariantImage"/>
+
+
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+    [Parameter] public string productNo { get; set; }
+    [Parameter] public string variantNo { get; set; }
+
+    private Company Company { get; set; }
+    private VariantImage variantImage = new VariantImage();
+    private Variant[] Variants { get; set; }
+    private Variant Variant { get; set; }
+    private Product[] Products { get; set; }
+    private Product Product { get; set; }
+
+
+    protected override async Task OnInitializedAsync() {
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+
+        Products = await client.GetFromJsonAsync<Product[]>($"api/product?companyId={Company.CompanyId}");
+        Product = Products.FirstOrDefault(p => p.ProductNo == productNo);
+        
+        Variants = await client.GetFromJsonAsync<Variant[]>($"api/variant/{Product.ProductId}");
+        Variant = Variants.FirstOrDefault(v => v.ProductId == Product.ProductId && v.VariantNo == variantNo);
+    }
+    private async Task CreateVariantImage() {
+        await client.PostAsJsonAsync($"api/VariantImage?variantId={Variant.VariantId}", variantImage);
+        NavigationManager.NavigateTo($"{companySlug}/product/{productNo}/variant/{variantNo}/image");
+    }
+}

@@ -1,0 +1,46 @@
+  <div class="col mb-4">
+    <div class="card shadow-lg mb-5 bg-white rounded">
+      <h5 class="card-header">
+          @Name
+      </h5>
+      <div class="card-body">
+          <div class="row">
+              <div class="col card-title">Cusomers</div>
+              <div class="col card-text">@Customer_Count</div>
+          </div>
+          <div class="row">
+              <div class="col card-title">Purchase Orders</div>
+              <div class="col card-text">@PurchaseOrder_Count</div>
+          </div>
+          <div class="row">
+              <div class="col card-title">Sales Orders</div>
+              <div class="col card-text">@SalesOrder_Count</div>
+          </div>
+          <div class="row">
+              <p>@Message</p>
+          </div>
+      </div>
+      <div class="card-footer">
+          <div class="row">
+              <div class="col">
+                  <a href="@CompanyLink" class="btn btn-primary">Open</a>
+              </div>
+              <div class="col">
+                  <small class="text-muted">Created @CreatedDate.Date</small>
+              </div>
+          </div>
+      
+    </div>
+    </div>
+  </div>
+
+
+  @code {
+      [Parameter] public string Name { get; set; }
+      [Parameter] public DateTime CreatedDate { get; set;}
+      [Parameter] public int Customer_Count { get; set; }
+      [Parameter] public int PurchaseOrder_Count { get; set; }
+      [Parameter] public int SalesOrder_Count { get; set; }
+      [Parameter] public string CompanyLink { get; set; }
+      [Parameter] public string Message { get; set; }
+  }

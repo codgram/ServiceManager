@@ -1,0 +1,39 @@
+@inject HttpClient client
+
+<EditForm Model="@Customer" OnValidSubmit="@OnValidSubmit">
+    <DataAnnotationsValidator />
+
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label class="control-label">Name</label>
+            <InputText class="form-control" @bind-Value="@Customer.Name" />
+            <ValidationMessage For="@(() => Customer.Name)" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Phone No</label>
+            <input class="form-control" @bind="@Customer.PhoneNo" />
+            <ValidationMessage For="@(() => Customer.PhoneNo)" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Email</label>
+            <input class="form-control" @bind="@Customer.Email" />
+            <ValidationMessage For="@(() => Customer.Email)" />
+        </div>
+    </div>
+</div>
+    
+    <button type="submit" class="btn btn-success">
+        @ButtonText
+    </button>
+
+</EditForm>
+
+
+@code {
+    [Parameter] public Customer Customer { get; set; }
+    [Parameter] public string ButtonText { get; set; } = "Save";
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+}

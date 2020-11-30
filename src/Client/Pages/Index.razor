@@ -1,0 +1,47 @@
+﻿@page "/"
+@inject HttpClient client
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using ServiceManager.Shared.Models
+@attribute [Authorize]
+@layout CompanyLayout
+
+
+<AuthorizeView>
+    <Authorized>
+        <h2>Hello, @context.User.Identity.Name!</h2>
+    </Authorized>
+    <NotAuthorized>
+        <h2>Hello, world!</h2>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+
+
+
+@code {
+    Company[] companies { get; set; }
+    Customer[] customers { get; set; }
+    PurchaseHeader[] purchaseOrders { get; set; }
+    SalesHeader[] salesOrders { get; set; }
+    public int customersCount => customers != null ? customers.Count() : 0;
+    public int purchaseOrdersCount => purchaseOrders != null ? purchaseOrders.Count() : 0;
+    public int salesOrdersCount => salesOrders != null ? salesOrders.Count() : 0;
+
+    protected override async Task OnInitializedAsync() {
+        companies = await client.GetFromJsonAsync<Company[]>("api/company");
+    }
+
+    async void GetCustomers(string companyId) {
+        customers = await client.GetFromJsonAsync<Customer[]>($"api/customer/{companyId}");
+    }
+
+    async void GetPurchaseOrders(string companyId) {
+        purchaseOrders = await client.GetFromJsonAsync<PurchaseHeader[]>($"api/purchaseHeader/{companyId}");
+    }
+
+    async void GetSalesOrders(string companyId) {
+        salesOrders = await client.GetFromJsonAsync<SalesHeader[]>($"api/salesHeader/{companyId}");
+    }
+}

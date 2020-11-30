@@ -1,0 +1,29 @@
+@page "/{companySlug}/customer/create"
+@using ServiceManager.Client.Components.SalesManagement
+@inject HttpClient client
+@inject NavigationManager NavigationManager
+
+
+<h3>Create Customer</h3>
+
+<CustomerForm Customer="@Customer" ButtonText="Create" OnValidSubmit="CreateCustomer"/>
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+    private Customer Customer = new Customer();
+    private Company Company { get; set; }
+
+
+    protected override async Task OnInitializedAsync() {
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+    }
+
+
+    async Task CreateCustomer(){ 
+        await client.PostAsJsonAsync($"api/customer?companyId={Company.CompanyId}", Customer);
+        NavigationManager.NavigateTo($"{companySlug}/customer");
+    }
+}

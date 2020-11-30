@@ -1,0 +1,40 @@
+@page "/{companySlug}/product/subcategory/create"
+@inject HttpClient client
+@using Microsoft.AspNetCore.Components.Authorization
+@using ServiceManager.Shared.Models
+@using ServiceManager.Shared.Models.ProductManagement
+@using ServiceManager.Shared.Models.Setup
+@using ServiceManager.Client.Components.Product
+@inject NavigationManager NavigationManager
+@using ServiceManager.Client.Shared.PIM
+@layout PIMLayout
+
+
+<ProductSubcategoryForm ButtonText="Create" productSubcategory="@productSubcategory" OnValidSubmit="@CreateProductSubcategory" productCategories="@productCategories" companySlug="@companySlug" />
+
+@code {
+
+    [Parameter]
+    public string companySlug { get; set; }
+    ProductSubcategory productSubcategory = new ProductSubcategory();
+    private Company Company;
+    private Company[] companies;
+    public ProductCategory[] productCategories { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    async Task CreateProductSubcategory()
+    {
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+        companies = await client.GetFromJsonAsync<Company[]>("api/company");
+        await client.PostAsJsonAsync($"api/productsubcategory?companyId{Company.CompanyId}", productSubcategory);
+
+        NavigationManager.NavigateTo($"/{Company.Slug}/product/Subcategory/");
+
+    }
+
+}
+

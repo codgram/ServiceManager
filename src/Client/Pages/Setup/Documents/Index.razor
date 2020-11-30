@@ -1,0 +1,67 @@
+@page "/{companySlug}/setup/documents" 
+@using ServiceManager.Shared.Models.Setup
+@inject HttpClient http
+@layout SetupLayout
+
+
+<a href="@companySlug/setup/documents/create" class="btn btn-primary">Create</a>
+<hr >
+
+@if (setups == null)
+{
+    <text>Loading...</text>
+}
+else if (setups.Length == 0)
+{
+    <text>No Records Found</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Type</th>
+                <th>Part</th>
+                <th>Content</th>
+                @* <th></th> *@
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (DocumentSetup setup in setups)
+            {
+                <tr>
+                    <td>@setup.Company.Name</td>
+                    <td>@setup.DocumentType</td>
+                    <td>@setup.Part</td>
+                    <td>@setup.Content</td>
+                    @* <td>
+                        <a class="btn btn-success" href="chatroom/edit/@room.ChatroomId">Edit</a>
+                        <button class="btn btn-danger" @onclick="@(() => Delete(room.ChatroomId))">Delete</button>
+                    </td> *@
+                </tr>
+            }
+
+        </tbody>
+    </table>
+}
+
+
+@code {
+
+    [Parameter]
+    public string companySlug { get; set; }
+    DocumentSetup[] setups { get; set; }
+    Company Company { get; set; }
+    
+
+
+    protected override async Task OnInitializedAsync() {
+        Company = await http.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+
+        setups = await http.GetFromJsonAsync<DocumentSetup[]>($"api/setup/documents?companyId={Company.CompanyId}");
+    }
+}

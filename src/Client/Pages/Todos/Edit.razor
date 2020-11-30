@@ -1,0 +1,34 @@
+@page "/{companySlug}/todo/{todoItemId}"
+@inject HttpClient client
+@inject NavigationManager NavigationManager
+
+
+
+
+
+<TodoForm ButtonText="Save" todo="@TodoItem" OnValidSubmit="@SaveTodo" />
+
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+    [Parameter] public string todoItemId { get; set; }
+    public TodoItem TodoItem = new TodoItem();
+    private Company Company { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+        TodoItem = await client.GetFromJsonAsync<TodoItem>($"api/todo/{todoItemId}");
+        
+    }
+
+    private async void SaveTodo() {
+        await client.PutAsJsonAsync($"api/todo/{todoItemId}", TodoItem);
+        NavigationManager.NavigateTo($"{companySlug}/todo");
+    }
+
+
+}

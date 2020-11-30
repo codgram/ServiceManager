@@ -1,0 +1,82 @@
+@page "/{companySlug}/product/{productNo}/variant/"
+@inject HttpClient client
+@using ServiceManager.Client.Shared.PIM
+@layout PIMLayout
+
+<a href="@companySlug/product/@productNo/variant/create" class="btn btn-primary">Create</a>
+<br />
+@if (Variants == null || Product == null)
+{
+    <text>Loading...</text>
+}
+else if (Variants.Length == 0)
+{
+    <text>No Records Found</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Variant No</th>
+                <th>Variant Type</th>
+                <th>Variation</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Variant variant in Variants)
+            {
+                <tr>
+                    <td>@variant.VariantNo</td>
+                    <td>@variant.Type</td>
+                    <td>@variant.Variation</td>
+                    <td>
+                        <div class="btn-group">
+                          <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            Action
+                          </button>
+                          <ul class="dropdown-menu">
+                            <li><a class="dropdown-item disabled" href="">Edit</a></li>                                                    
+                            <li><a class="dropdown-item disabled" href="#">Details</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item disabled" >Add Cost</a></li>
+                            <li><a class="dropdown-item" href="@companySlug/product/@productNo/variant/@variant.VariantNo/price" >Prices</a></li>
+                            <li><a class="dropdown-item" href="@companySlug/product/@productNo/variant/@variant.VariantNo/price/create" >Add Price</a></li>
+                            <li><a class="dropdown-item" href="@companySlug/product/@productNo/variant/@variant.VariantNo/image">Images</a></li>
+                            <li><a class="dropdown-item" href="@companySlug/product/@productNo/variant/@variant.VariantNo/image/create">Add Image</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item disabled" >Delete</a></li>
+                          </ul>
+                        </div>
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+}
+
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+    [Parameter] public string productNo { get; set; }
+
+    private Company Company { get; set; }
+    private Variant[] Variants { get; set; }
+    private Product[] Products { get; set; }
+    private Product Product { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+        Products = await client.GetFromJsonAsync<Product[]>($"api/product?companyId={Company.CompanyId}");
+        Product = Products.FirstOrDefault(p => p.ProductNo == productNo);
+        Variants = await client.GetFromJsonAsync<Variant[]>($"api/variant/{Product.ProductId}");
+            
+    }
+
+}

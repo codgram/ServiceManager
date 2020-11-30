@@ -1,0 +1,27 @@
+@page "/{slug}"
+@inject HttpClient client
+@inject Services.CompanyFilter CompanyFilter
+
+
+
+
+
+<p>@testAppDataService</p>
+
+
+@code {
+    [Parameter] public string slug { get; set; }
+
+    private Company Company { get; set; }
+
+    private string testAppDataService { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={slug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+    }
+
+}

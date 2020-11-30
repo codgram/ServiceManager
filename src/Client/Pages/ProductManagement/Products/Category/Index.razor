@@ -1,0 +1,72 @@
+@page "/{companySlug}/product/category"
+@inject HttpClient client
+@using ServiceManager.Client.Shared.PIM
+@layout PIMLayout
+@inject IJSRuntime JsRuntime
+
+
+
+<a href="@companySlug/product/category/create" class="btn btn-primary">Create</a>
+<br />
+@if (productCategories == null)
+{
+    <text>Loading...</text>
+}
+else if (productCategories.Length == 0)
+{
+    <text>No Records Found</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Group</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (ProductCategory productCategory in productCategories)
+            {
+                <tr>
+                    <td>@productCategory.ProductGroup.Name</td>
+                    <td>@productCategory.Name</td>
+                    <td>@productCategory.Description</td>
+                    <td>
+                        <a class="btn btn-success" href="@companySlug/product/category/edit/@productCategory.ProductCategoryId">Edit</a>
+                        @* <button class="btn btn-danger" @onclick="@(() => Delete(room.ChatroomId))">Delete</button> *@
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+}
+
+
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+    private ProductCategory[] productCategories { get; set; }
+    private ProductCategory ProductCategory { get; set; }
+    private Company Company { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+        productCategories = await client.GetFromJsonAsync<ProductCategory[]>($"api/productcategory?companyId={Company.CompanyId}");
+    }
+
+    private async Task DeleteProductCategory(string productCategoryId) {
+        var productCategory = await client.GetFromJsonAsync<ProductCategory>($"api/productcategory/{productCategoryId}");
+        if(await JsRuntime.InvokeAsync<bool>("comfirm", $"Do you want to delete {productCategory.Name}?")){
+                    await client.DeleteAsync($"api/productcategory/{productCategoryId}");
+            }
+        await OnInitializedAsync();
+    }
+}

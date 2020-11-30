@@ -1,0 +1,15 @@
+{
+  "name": "ServiceManager",
+  "short_name": "Service Manager",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffebeb",
+  "theme_color": "#03173d",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+@page "/{companySlug}/members"
+@using Models
+@inject HttpClient client
+@inject Services.CompanyFilter CompanyFilter
+
+
+<h3>@companySlug | Members</h3>
+
+<a href="@companySlug/members/add" class="btn btn-primary">Add Member</a>
+<br />
+
+
+@if(Members == null) {
+    <p>Loading ...</p>
+}
+else if(Members.Length == 0) {
+    <p>No members yet!</p>
+}
+else {
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Member member in Members)
+            {
+                
+                <tr>
+                    <td>@GetUserById(member.ServiceManagerUserId)</td>
+                    <td>
+                        @* <a class="btn btn-success" href="@companySlug/product/category/edit/@productCategory.ProductCategoryId">Edit</a> *@
+                        @* <button class="btn btn-danger" @onclick="@(() => Delete(room.ChatroomId))">Delete</button> *@
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+}
+
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+    private Member[] Members { get; set; }
+    private Company Company { get; set; }
+    private ServiceManagerUser ServiceManagerUser { get; set; }
+    private ServiceManagerUser[] ServiceManagerUsers { get; set; } 
+
+
+    protected override async Task OnInitializedAsync() {
+
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+
+        Members = await client.GetFromJsonAsync<Member[]>($"api/member?companyId={Company.CompanyId}");
+        ServiceManagerUsers = await client.GetFromJsonAsync<ServiceManagerUser[]>($"api/user?companyId={Company.CompanyId}");
+    }
+
+    private string GetUserById(string userId) {
+        return ServiceManagerUsers.FirstOrDefault(s => s.Id == userId).UserName;
+    }
+}

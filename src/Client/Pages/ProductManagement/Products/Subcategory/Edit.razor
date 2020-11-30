@@ -1,0 +1,39 @@
+@page "/{companySlug}/product/subcategory/edit/{productSubcategoryId}"
+@using ServiceManager.Client.Components.Product
+@inject HttpClient client
+@inject IJSRuntime jsRuntime
+@inject NavigationManager NavigationManager
+@using ServiceManager.Client.Shared.PIM
+@layout PIMLayout
+
+
+<ProductSubcategoryForm ButtonText="Create" productSubcategory="@ProductSubcategory" OnValidSubmit="@EditProductSubcategory" productCategories="@ProductCategories" companySlug="@companySlug" />
+
+
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+    [Parameter] public string productSubcategoryId { get; set; }
+    private Company Company { get; set; }
+
+    public ProductCategory[] ProductCategories { get; set; }
+    public ProductSubcategory ProductSubcategory = new ProductSubcategory();
+
+
+    protected override async Task OnInitializedAsync() {
+
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+
+        ProductSubcategory = await client.GetFromJsonAsync<ProductSubcategory>($"api/productsubcategory/{productSubcategoryId}");
+        ProductCategories = await client.GetFromJsonAsync<ProductCategory[]>($"api/productcategory?companyId{Company.CompanyId}");
+        
+    }
+
+    private async Task EditProductSubcategory() {
+        await client.PutAsJsonAsync($"api/productSubcategory/{productSubcategoryId}", ProductSubcategory);
+        await jsRuntime.InvokeVoidAsync("alert", $"Updated Successfully!");
+        NavigationManager.NavigateTo($"/{companySlug}/product/Subcategory");
+    }
+}

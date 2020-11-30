@@ -1,0 +1,34 @@
+@page "/{companySlug}/customer/{customerId}/edit"
+@using ServiceManager.Client.Components.SalesManagement
+@inject HttpClient client
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+
+<h3>Create Customer</h3>
+
+<CustomerForm Customer="@Customer" OnValidSubmit="SaveCustomer"/>
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+    [Parameter] public string customerId { get; set; }
+    private Customer Customer = new Customer();
+    private Company Company { get; set; }
+
+
+    protected override async Task OnInitializedAsync() {
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+
+        Customer = await client.GetFromJsonAsync<Customer>($"api/customer/{customerId}");
+    }
+
+
+    async Task SaveCustomer(){ 
+        await client.PutAsJsonAsync($"api/customer/{customerId}", Customer);
+        await JSRuntime.InvokeVoidAsync("alert", "Updated Successfully");
+        NavigationManager.NavigateTo($"{companySlug}/customer");
+    }
+}

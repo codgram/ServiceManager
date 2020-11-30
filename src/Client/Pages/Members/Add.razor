@@ -1,0 +1,37 @@
+@page "/{companySlug}/members/add"
+@inject HttpClient client
+@inject NavigationManager NavigationManager
+@inject Services.CompanyFilter CompanyFilter
+
+
+<div class="input-group mb-3">
+  <input type="text" class="form-control" placeholder="username" aria-label="username" @bind="@username">
+  <div class="input-group-append">
+    <button class="btn btn-outline-secondary" type="button" id="button-addon2" @onclick="AddMember">Add Member</button>
+  </div>
+</div>
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+    private Company Company { get; set; }
+    public Member member = new Member();
+
+    public string username { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+    }
+
+
+    async Task AddMember(){
+        if(username != null) {
+            Member member = new Member(){
+                CompanyId = Company.CompanyId,  
+            };
+            await client.PostAsJsonAsync($"api/member?username{username}", member);
+        }
+        NavigationManager.NavigateTo($"{companySlug}/members");
+    }
+}

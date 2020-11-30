@@ -1,0 +1,59 @@
+@inject HttpClient client
+
+<EditForm Model="@Variant" OnValidSubmit="@OnValidSubmit">
+    <DataAnnotationsValidator />
+
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label class="control-label">Product No</label>
+            <input class="form-control" @bind="@ProductNo" disabled/>
+        </div>
+        <div class="form-group">
+            <label class="control-label">Variant Type</label>
+            <InputSelect class ="form-control" @bind-Value="Variant.Type">
+                <option value="">Select ...</option>
+                <option value="@VariantType.Color">Color</option>
+                <option value="@VariantType.Edition">Edition</option>
+                <option value="@VariantType.Flavor">Flavor</option>
+                <option value="@VariantType.Format">Format</option>
+                <option value="@VariantType.Length">Length</option>
+                <option value="@VariantType.Material">Material</option>
+                <option value="@VariantType.Model">Model</option>
+                <option value="@VariantType.Platform">Platform</option>
+                <option value="@VariantType.Scent">Scent</option>
+                <option value="@VariantType.Size">Size</option>
+                <option value="@VariantType.Width">Width</option>
+            </InputSelect>
+                
+        </div>
+        <div class="form-group">
+            <label class="control-label">Variant No</label>
+            <input class="form-control" @bind="@Variant.VariantNo" />
+            <ValidationMessage For="@(() => Variant.VariantNo)" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Variation</label>
+            <input class="form-control" @bind="@Variant.Variation" />
+            <ValidationMessage For="@(() => Variant.Variation)" />
+        </div>
+    </div>
+</div>
+    
+    <button type="submit" class="btn btn-success">
+        @ButtonText
+    </button>
+
+</EditForm>
+
+
+@code {
+    [Parameter] public Variant Variant { get; set; }
+    [Parameter] public string ProductNo { get; set; }
+    [Parameter] public string ButtonText { get; set; } = "Save";
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+
+
+}

@@ -1,0 +1,37 @@
+@page "/{companySlug}/product/create"
+@inject HttpClient http
+@using Microsoft.AspNetCore.Components.Authorization
+@using ServiceManager.Shared.Models
+@using ServiceManager.Shared.Models.ProductManagement
+@using ServiceManager.Shared.Models.Setup
+@using ServiceManager.Client.Components.Product
+@inject NavigationManager NavigationManager
+@using ServiceManager.Client.Shared.PIM
+@layout PIMLayout
+
+<ProductForm ButtonText="Create" product="@product" OnValidSubmit="@CreateProduct" companySlug="@companySlug" />
+
+@code {
+
+    [Parameter]
+    public string companySlug { get; set; }
+    Product product = new Product();
+    private Company Company;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+
+    async Task CreateProduct()
+    {
+        Company = await http.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+
+        await http.PostAsJsonAsync($"api/product/{Company.CompanyId}", product);
+        NavigationManager.NavigateTo($"/{Company.Slug}/product");
+    }
+
+}
+

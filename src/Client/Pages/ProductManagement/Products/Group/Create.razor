@@ -1,0 +1,36 @@
+@page "/{companySlug}/product/group/create"
+@inject HttpClient http
+@using Microsoft.AspNetCore.Components.Authorization
+@using ServiceManager.Shared.Models
+@using ServiceManager.Shared.Models.ProductManagement
+@using ServiceManager.Shared.Models.Setup
+@using ServiceManager.Client.Components.Product
+@inject NavigationManager NavigationManager
+@using ServiceManager.Client.Shared.PIM
+@layout PIMLayout
+
+
+<ProductGroupForm ButtonText="Create" productGroup="@productGroup" OnValidSubmit="@CreateProductGroup" />
+
+@code {
+
+    [Parameter]
+    public string companySlug { get; set; }
+    ProductGroup productGroup = new ProductGroup();
+    private Company Company;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+
+    async Task CreateProductGroup()
+    {
+        Company = await http.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+        await http.PostAsJsonAsync($"api/productgroup?companyId={Company.CompanyId}", productGroup);
+        NavigationManager.NavigateTo($"{Company.Slug}/product/group/");
+    }
+
+}
+

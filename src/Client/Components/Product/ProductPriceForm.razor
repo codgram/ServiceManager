@@ -1,0 +1,40 @@
+@inject HttpClient client
+
+<EditForm Model="@productPrice" OnValidSubmit="@OnValidSubmit">
+    <DataAnnotationsValidator />
+
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label class="control-label">Price Date</label>
+            <InputDate class="form-control" @bind-Value="@productPrice.PriceDate" />
+            <ValidationMessage For="@(() => productPrice.PriceDate)" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Price</label>
+            <input class="form-control" @bind="@productPrice.Price" />
+            <ValidationMessage For="@(() => productPrice.Price)" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Currency</label>
+            <input class="form-control" @bind="@productPrice.Currency" disabled/>
+            <ValidationMessage For="@(() => productPrice.Currency)" />
+        </div>
+    </div>
+</div>
+    
+    <button type="submit" class="btn btn-success">
+        @ButtonText
+    </button>
+
+</EditForm>
+
+
+@code {
+    [Parameter] public ProductPrice productPrice { get; set; }
+    [Parameter] public string ButtonText { get; set; } = "Save";
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+
+}

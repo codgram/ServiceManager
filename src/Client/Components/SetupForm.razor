@@ -1,0 +1,58 @@
+@using ServiceManager.Shared.Models.Setup
+
+
+<EditForm Model="@setup" OnValidSubmit="@OnValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="row">
+        <div class="col-md-4">
+
+
+            <div class="form-group">
+                <label class="control-label">
+                    Document Type</label>
+                    <InputSelect class ="form-control" @bind-Value="setup.DocumentType">
+                        <option value="">Select ...</option>
+                        <option value="@DocumentType.Purchase">Purchase Orders</option>
+                        <option value="@DocumentType.Sales">Sales Orders</option>
+                        <option value="@DocumentType.Invoice">Invoices</option>
+                    </InputSelect>
+                
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">
+                    Part</label>
+                    <InputSelect class ="form-control" @bind-Value="setup.Part">
+                        <option value="">Select ...</option>
+                        <option value="@DocumentSetupPart.Prefix">Prefix</option>
+                        <option value="@DocumentSetupPart.Suffix">Suffix</option>
+                    </InputSelect>
+                
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">Content</label>
+                <input class="form-control" @bind="@setup.Content" @bind:event="oninput"/>
+                <small id="passwordHelpBlock" class="form-text text-muted">
+                    @setup.Content -20-000001
+                </small>
+                <ValidationMessage For="@(() => setup.Content)" />
+            </div>
+
+        </div>
+    </div>
+    
+    <button type="submit" class="btn btn-success">
+        @ButtonText
+    </button>
+
+</EditForm>
+
+
+@code {
+    [Parameter] public DocumentSetup setup { get; set; }
+    [Parameter] public string ButtonText { get; set; } = "Save";
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+}

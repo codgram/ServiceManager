@@ -1,0 +1,62 @@
+@inject HttpClient client
+
+<EditForm Model="@productSubcategory" OnValidSubmit="@OnValidSubmit">
+    <DataAnnotationsValidator />
+
+
+<div class="row">
+    <div class="form-group">
+                <label class="control-label">
+                    Document Type</label>
+                    <InputSelect class ="form-control" @bind-Value="productSubcategory.ProductCategoryId">
+                        <option value="">Select ...</option>
+                        @if(productCategories == null) {
+                            <option>Loading product groups</option>
+                        }
+                        else if(productCategories.Length == 0) {
+                            <option>you need to create category</option>
+                        }
+                        else {
+                            @foreach(var productCategory in productCategories) {
+                            <option value="@productCategory.ProductCategoryId">@productCategory.Name</option>
+                            }
+                        }
+                    </InputSelect>
+                
+            </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label class="control-label">Name</label>
+            <InputText class="form-control" @bind-Value="@productSubcategory.Name" />
+            <ValidationMessage For="@(() => productSubcategory.Name)" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Description</label>
+            <input class="form-control" @bind="@productSubcategory.Description" />
+            <ValidationMessage For="@(() => productSubcategory.Description)" />
+        </div>
+    </div>
+</div>
+    
+    <button type="submit" class="btn btn-success">
+        @ButtonText
+    </button>
+
+</EditForm>
+
+
+@code {
+    [Parameter] public ProductSubcategory productSubcategory { get; set; }
+    [Parameter] public Company company { get; set; }
+    [Parameter] public string companySlug { get; set; }
+    [Parameter] public ProductCategory[] productCategories { get; set; }
+    [Parameter] public string ButtonText { get; set; } = "Save";
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+
+    protected override async Task OnInitializedAsync() {
+        company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        productCategories = await client.GetFromJsonAsync<ProductCategory[]>($"api/productcategory?companyId={company.CompanyId}");
+    } 
+
+}
