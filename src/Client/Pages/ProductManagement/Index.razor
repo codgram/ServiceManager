@@ -1,0 +1,21 @@
+@page "/{companySlug}/pim"
+@using ServiceManager.Client.Shared.PIM
+@inject HttpClient client
+@layout PIMLayout
+
+
+<h4>Coming Soon!</h4>
+
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+
+    private Company Company { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+
+    }
+}

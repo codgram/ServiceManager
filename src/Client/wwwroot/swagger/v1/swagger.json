@@ -1,0 +1,149 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Sample Password Flow OAuth2 Project",
+      "description": "This is an example of using OAuth2 Password Flow in a specification to describe security to your API.",
+      "version": "1.0.0"
+    },
+    "servers": [
+      {
+        "url": "https://localhost:5001/api",
+        "description": "SwaggerHub API Auto Mocking"
+      }
+    ],
+    "security": [
+      {
+        "bearerAuth": []
+      }
+    ],
+    "paths": {
+      "/company": {
+        "get": {
+          "summary": "All companies",
+          "description": "This operation gets all the companies where the user is a member",
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        },
+        "post": {
+          "summary": "Create a new company",
+          "description": "Create a new company",
+          "requestBody": {
+            "$ref": "#/components/requestBodies/companyBody"
+          },
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/company/{companyId}": {
+        "get": {
+          "summary": "Get a company by Id",
+          "parameters": [
+            {
+              "name": "companyId",
+              "in": "path",
+              "description": "Numeric ID of the user to get",
+              "required": true,
+              "style": "simple",
+              "explode": false,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/company/slug={companySlug}": {
+        "get": {
+          "summary": "Get a company by slug",
+          "parameters": [
+            {
+              "name": "companySlug",
+              "in": "path",
+              "description": "Numeric ID of the user to get",
+              "required": true,
+              "style": "simple",
+              "explode": false,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "Company": {
+          "type": "object",
+          "properties": {
+            "companyId": {
+              "type": "string"
+            },
+            "createdDateTime": {
+              "type": "string"
+            },
+            "modifiedDateTime": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "slug": {
+              "type": "string"
+            },
+            "serviceManagerUserId": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "requestBodies": {
+        "companyBody": {
+          "description": "A JSON object containing company information",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Company"
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "securitySchemes": {
+        "password": {
+          "type": "oauth2",
+          "flows": {
+            "password": {
+              "tokenUrl": "http://example.com/oauth/token",
+              "scopes": {
+                "write": "allows modifying resources",
+                "read": "allows reading resources"
+              }
+            }
+          }
+        },
+        "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT"
+        }
+      }
+    }
+  }

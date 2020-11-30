@@ -1,0 +1,33 @@
+<div class="col mb-4">
+    <div class="card shadow-lg mb-5 bg-white rounded">
+        <h5 class="card-header">
+            @PurchaseOrderNo
+        </h5>
+        <div class="card-body">
+            <h5 class="card-title">@CustomerName</h5>
+            <p class="card-text">@TotalPrice</p>
+            <a href="@PurchaseOrderLink" class="btn btn-primary">Open</a>
+        </div>
+        <div class="card-footer">
+            <div class="row">
+                <div class="col">
+                    <a href="@PurchaseOrderLink" class="btn btn-primary">Open</a>
+                </div>
+                <div class="col">
+                    <small class="text-muted">Created @CreatedDate</small>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public string PurchaseOrderNo { get; set; }
+    [Parameter] public DateTime CreatedDate { get; set; }
+    [Parameter] public string CustomerName { get; set; }
+    [Parameter] public decimal TotalPrice { get; set; }
+    [Parameter] public string PurchaseOrderLink { get; set; }
+
+}

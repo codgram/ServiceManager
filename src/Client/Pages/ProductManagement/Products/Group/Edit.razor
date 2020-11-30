@@ -1,0 +1,35 @@
+@page "/{companySlug}/product/group/edit/{productGroupId}"
+@using ServiceManager.Client.Components.Product
+@inject HttpClient client
+@inject IJSRuntime jsRuntime
+@inject NavigationManager NavigationManager
+@using ServiceManager.Client.Shared.PIM
+@layout PIMLayout
+
+
+<ProductGroupForm ButtonText="Create" productGroup="@ProductGroup" OnValidSubmit="@EditProductGroup" />
+
+
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+    [Parameter] public string productGroupId { get; set; }
+    private Company Company { get; set; }
+    public ProductGroup ProductGroup = new ProductGroup();
+
+    protected override async Task OnInitializedAsync() {
+
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+
+        ProductGroup = await client.GetFromJsonAsync<ProductGroup>($"api/productgroup/{productGroupId}");
+        
+    }
+
+    private async Task EditProductGroup() {
+        await client.PutAsJsonAsync($"api/productgroup/{productGroupId}", ProductGroup);
+        await jsRuntime.InvokeVoidAsync("alert", $"Updated Successfully!");
+        NavigationManager.NavigateTo($"/{companySlug}/product/group");
+    }
+}

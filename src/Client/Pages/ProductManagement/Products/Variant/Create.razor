@@ -1,0 +1,44 @@
+@page "/{companySlug}/product/{productNo}/variant/create"
+@using ServiceManager.Client.Components.Product
+@inject NavigationManager NavigationManager
+@inject HttpClient client
+@using ServiceManager.Client.Shared.PIM
+@layout PIMLayout
+
+@if(Product == null) {
+    ProductNo = "";
+}
+else {
+    ProductNo = Product.ProductNo;
+}
+
+<VariantForm  Variant="@variant" ProductNo="@ProductNo" OnValidSubmit="CreateVariant"/>
+
+
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+    [Parameter] public string productNo { get; set; }
+    private string ProductNo { get; set; }
+    private Company Company { get; set; }
+    private Product[] Products { get; set; }
+    private Product Product { get; set; }
+    private Variant variant = new Variant();
+
+
+    protected override async Task OnInitializedAsync() {
+        
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+
+        Products = await client.GetFromJsonAsync<Product[]>($"api/product?companyId={Company.CompanyId}");
+        Product = Products.FirstOrDefault(p => p.ProductNo == productNo);
+    }
+
+    async Task CreateVariant() {
+        variant.ProductId = Product.ProductId;
+        await client.PostAsJsonAsync($"api/variant/{Product.ProductId}", variant);
+        NavigationManager.NavigateTo($"/{companySlug}/product/{productNo}/variant/");
+    }
+}

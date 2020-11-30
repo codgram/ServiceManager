@@ -1,0 +1,34 @@
+@inject HttpClient client
+
+<EditForm Model="@productGroup" OnValidSubmit="@OnValidSubmit">
+    <DataAnnotationsValidator />
+
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label class="control-label">Name</label>
+            <InputText class="form-control" @bind-Value="@productGroup.Name" />
+            <ValidationMessage For="@(() => productGroup.Name)" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Description</label>
+            <input class="form-control" @bind="@productGroup.Description" />
+            <ValidationMessage For="@(() => productGroup.Description)" />
+        </div>
+    </div>
+</div>
+    
+    <button type="submit" class="btn btn-success">
+        @ButtonText
+    </button>
+
+</EditForm>
+
+
+@code {
+    [Parameter] public ProductGroup productGroup { get; set; }
+    [Parameter] public string ButtonText { get; set; } = "Save";
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+}

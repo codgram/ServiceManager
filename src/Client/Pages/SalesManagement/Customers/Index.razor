@@ -1,0 +1,87 @@
+@page "/{companySlug}/customer"
+@inject HttpClient client
+
+
+<div class="row">
+    <div class="col-8">
+        <h3>Customers</h3>
+    </div>
+    <div class="col-4">
+        <a href="@companySlug/customer/create" class="btn btn-sm btn-primary mb-3 float-right">Create</a>
+    </div>
+</div>
+
+
+<nav aria-label="breadcrumb" >
+  <ol class="breadcrumb shadow-lg bg-white rounded">
+    <li class="breadcrumb-item"><a href="#">home</a></li>
+    <li class="breadcrumb-item"><a href="/@companySlug">@companySlug</a></li>
+    <li class="breadcrumb-item active" aria-current="page">customer</li>
+  </ol>
+</nav>
+
+
+@if(Customers == null) {
+    <p>Loading ...</p>
+}
+else if(Customers.Length == 0) {
+    <br />
+    <p>No Records Yet!</p>
+}
+else {
+    <table class="table table-striped shadow-lg p-3 mb-5 bg-white rounded">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Customer customer in Customers)
+            {
+                <tr>
+                    <td>@customer.Name</td>
+                    <td>@customer.PhoneNo</td>
+                    <td>
+                        <div class="btn-group">
+                          <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            Action
+                          </button>
+                          <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="@companySlug/customer/@customer.CustomerId/edit">Edit</a></li>                                                    
+                            <li><a class="dropdown-item disabled" href="#">Details</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item disabled" >Delete</a></li>
+                          </ul>
+                        </div>
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+}
+
+
+
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+
+    private Company Company { get; set; }
+    private Customer[] Customers { get; set; }
+    
+
+
+    protected override async Task OnInitializedAsync() {
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+
+        Customers = await client.GetFromJsonAsync<Customer[]>($"api/customer?companyId={Company.CompanyId}");
+
+    }
+
+    
+}

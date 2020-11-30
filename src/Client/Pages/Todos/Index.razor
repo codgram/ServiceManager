@@ -1,0 +1,99 @@
+@page "/{companySlug}/todo"
+@inject Services.CompanyFilter CompanyFilter
+@inject HttpClient client
+
+<h3>Todo (@todos.Count(todo => !todo.IsCompleted))</h3>
+
+
+<div class="input-group mb-3">
+  <input type="text" class="form-control" aria-label="Text input with checkbox" placeholder="Something todo" @bind="title">
+  <div class="input-group-append">
+    <button class="btn btn-outline-secondary" type="button" id="button-addon2" @onclick="AddTodo">Add todo</button>
+  </div>
+</div>
+
+
+
+    @if(todos != null) {
+        @foreach (var todo in todos.Where(t => t.IsCompleted == false))
+        {
+            int count = 1;
+            @if(todo.TodoItemId != null) {
+                <div class="input-group mb-3">
+                    <div class="input-group-text">
+                        <input type="checkbox" class="form-check-input"  @bind="todo.IsCompleted" @onclick="@(() => CompleteTask(todo.TodoItemId))" >
+                    </div>
+                    <input type="text" class="form-control" placeholder="Something todo" @bind="todo.Title"  @oninput="ShowEditButton" disabled>
+                    <a class="btn btn-outline-secondary" type="button" id="@count" href="@companySlug/todo/@todo.TodoItemId">Edit</a>
+                </div>
+            }
+            else {
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="Something todo" @bind="todo.Title"  @oninput="ShowEditButton" disabled>
+                </div>
+            }
+            
+            count++;
+        }
+    }
+
+
+
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+    private IList<TodoItem> todos = new List<TodoItem>();
+    private TodoItem todoItem = new  TodoItem();
+
+    private TodoItem TodoItem { get; set; }
+    private string title { get; set; }
+    private Company Company { get; set; }
+
+    private bool IsTyped { get; set; } = true;
+    private string Hide => !IsTyped ? "" : "d-none";
+
+
+    protected override async Task OnInitializedAsync() {
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+        todos = await client.GetFromJsonAsync<IList<TodoItem>>($"api/todo?companyId={Company.CompanyId}");
+    }
+
+    private async void AddTodo()
+    {
+        
+        if (!string.IsNullOrWhiteSpace(title))
+        {
+            var x = new TodoItem() {
+                Title = title
+            };
+
+            todos.Add(x);
+
+            todoItem = new TodoItem() {
+                Title = title,
+                DueDate = DateTime.Now,
+                IsCompleted = false
+            };
+
+            title = string.Empty;
+            
+            await client.PostAsJsonAsync($"api/todo?companyId={Company.CompanyId}", todoItem);
+
+            await OnInitializedAsync();
+        }
+    }
+
+    private void ShowEditButton() {
+        IsTyped = false;
+    }
+    
+
+
+    private async void CompleteTask(string todoItemId) {
+        TodoItem = await client.GetFromJsonAsync<TodoItem>($"api/todo/{todoItemId}");
+        TodoItem.IsCompleted = true;
+        await client.PutAsJsonAsync($"api/todo/{TodoItem.TodoItemId}", TodoItem);
+    }
+}

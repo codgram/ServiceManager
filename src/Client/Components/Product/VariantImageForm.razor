@@ -1,0 +1,35 @@
+
+<EditForm Model="@VariantImage" OnValidSubmit="@OnValidSubmit">
+    <DataAnnotationsValidator />
+
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label class="control-label">Color</label>
+            <input class="form-control" @bind="@VariantImage.Color" />
+            <ValidationMessage For="@(() => VariantImage.Color)" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Image URL</label>
+            <input class="form-control" @bind="@VariantImage.ImageURL" />
+            <ValidationMessage For="@(() => VariantImage.ImageURL)" />
+        </div>
+    </div>
+</div>
+    
+    <button type="submit" class="btn btn-success">
+        @ButtonText
+    </button>
+
+</EditForm>
+
+
+@code {
+    [Parameter] public VariantImage VariantImage { get; set; }
+    [Parameter] public string ButtonText { get; set; } = "Save";
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+
+
+}

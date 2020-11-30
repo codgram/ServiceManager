@@ -1,0 +1,74 @@
+@page "/{companySlug}/product/subcategory"
+@inject HttpClient client
+@using ServiceManager.Client.Shared.PIM
+@layout PIMLayout
+
+
+<a href="@companySlug/product/subcategory/create" class="btn btn-primary">Create</a>
+<br />
+@if (productSubcategories == null)
+{
+    <text>Loading...</text>
+}
+else if (productSubcategories.Length == 0)
+{
+    <text>No Records Found</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Group</th>
+                <th>Category</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (ProductSubcategory productSubcategory in productSubcategories)
+            {
+                <tr>
+                    <td>@productSubcategory.ProductCategory.ProductGroup.Name</td>
+                    <td>@productSubcategory.ProductCategory.Name</td>
+                    <td>@productSubcategory.Name</td>
+                    <td>@productSubcategory.Description</td>
+                    <td>
+                        <div class="btn-group">
+                          <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            Action
+                          </button>
+                          <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="@companySlug/product/subcategory/edit/@productSubcategory.ProductSubcategoryId">Edit</a></li>                                                    
+                            <li><a class="dropdown-item disabled" href="#">Details</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item disabled" >Delete</a></li>
+                          </ul>
+                        </div>
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+}
+
+
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+    private ProductSubcategory[] productSubcategories { get; set; }
+    private Company Company { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+
+        productSubcategories = await client.GetFromJsonAsync<ProductSubcategory[]>($"api/productsubcategory?companyId={Company.CompanyId}");
+    }
+}

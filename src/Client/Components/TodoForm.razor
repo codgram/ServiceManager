@@ -1,0 +1,43 @@
+
+<EditForm Model="@todo" OnValidSubmit="@OnValidSubmit">
+    <DataAnnotationsValidator />
+
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label class="control-label">Due Date</label>
+            <InputDate class="form-control" @bind-Value="@todo.DueDate" />
+            <ValidationMessage For="@(() => todo.DueDate)" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Title</label>
+            <InputText class="form-control" @bind-Value="@todo.Title" />
+            <ValidationMessage For="@(() => todo.Title)" />
+        </div>
+        <div class="form-group">
+            <InputCheckbox class="form-check-input" @bind-Value="@todo.IsCompleted" />
+            <label class="control-label">Is Completed</label>
+            <ValidationMessage For="@(() => todo.IsCompleted)" />
+        </div>
+    </div>
+</div>
+    
+    <button type="submit" class="btn btn-success">
+        @ButtonText
+    </button>
+
+</EditForm>
+
+
+
+
+
+
+@code {
+    [Parameter] public TodoItem todo { get; set; }
+    [Parameter] public string ButtonText { get; set; } = "Save";
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+
+}

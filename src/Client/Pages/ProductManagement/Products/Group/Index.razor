@@ -1,0 +1,78 @@
+@page "/{companySlug}/product/group"
+@inject HttpClient client
+@using ServiceManager.Client.Shared.PIM
+@layout PIMLayout
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
+
+
+<a href="@companySlug/product/group/create" class="btn btn-primary">Create</a>
+<br />
+@if (productGroups == null)
+{
+    <text>Loading...</text>
+}
+else if (productGroups.Length == 0)
+{
+    <text>No Records Found</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (ProductGroup productGroup in productGroups)
+            {
+                <tr>
+                    <td>@productGroup.Name</td>
+                    <td>@productGroup.Description</td>
+                    <td>
+                        <div class="btn-group">
+                          <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            Action
+                          </button>
+                          <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="@companySlug/product/group/edit/@productGroup.ProductGroupId">Edit</a></li>                                                    
+                            <li><a class="dropdown-item disabled" href="#">Details</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item disabled" @onclick="@(() => DeleteProductGroup(productGroup.ProductGroupId))">Delete</a></li>
+                          </ul>
+                        </div>
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+}
+
+
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+    private ProductGroup[] productGroups { get; set; }
+    private Company Company { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+        productGroups = await client.GetFromJsonAsync<ProductGroup[]>($"api/productgroup?companyId={Company.CompanyId}");
+    }
+
+    private async Task DeleteProductGroup(string productGroupId) {
+        ProductGroup productGroup = await client.GetFromJsonAsync<ProductGroup>($"api/productgroup/{productGroupId}");
+        if(await JsRuntime.InvokeAsync<bool>("confirm", $"Do you want to delete {productGroup.Name}?")){
+                await client.DeleteAsync($"api/productgroup/{productGroupId}");
+            }
+        await OnInitializedAsync();
+    }
+}

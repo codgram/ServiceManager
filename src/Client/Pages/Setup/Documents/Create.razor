@@ -1,0 +1,34 @@
+@page "/{companySlug}/setup/documents/create"
+@inject HttpClient http
+@using Microsoft.AspNetCore.Components.Authorization
+@using ServiceManager.Shared.Models.Setup
+@inject NavigationManager NavigationManager
+@layout SetupLayout
+
+
+<SetupForm ButtonText="Create" setup="@setup" OnValidSubmit="@CreateDocumentSetup" />
+
+@code {
+
+    [Parameter]
+    public string companySlug { get; set; }
+    DocumentSetup setup = new DocumentSetup();
+    Company Company;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+
+    async Task CreateDocumentSetup()
+    {
+        Company = await http.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+
+        await http.PostAsJsonAsync($"api/setup/documents?companyId={Company.CompanyId}", setup);
+        NavigationManager.NavigateTo($"/{Company.Slug}/setup/documents/");
+    }
+
+}
+

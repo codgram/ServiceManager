@@ -1,0 +1,65 @@
+﻿@inject Services.CompanyFilter CompanyFilter
+
+
+<div class="top-row pl-4 navbar navbar-dark">
+    <a class="navbar-brand" href="">ServiceManager</a>
+    <button class="navbar-toggler" @onclick="ToggleNavMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <ul class="nav flex-column">
+        <li class="nav-item px-1">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Home
+            </NavLink>
+        </li>
+        <li class="nav-item px-1">
+            <NavLink class="nav-link" href="@todoLink" Match="NavLinkMatch.All">
+                <span class="oi oi-task" aria-hidden="true"></span> To Do
+            </NavLink>
+        </li>
+        <li class="nav-item px-1">
+            <NavLink class="nav-link" href="@pimLink" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Product Management
+            </NavLink>
+        </li>
+        <li class="nav-item px-1">
+            <NavLink class="nav-link" href="@customerLink" Match="NavLinkMatch.All">
+                <span class="oi oi-person" aria-hidden="true"></span> Customers
+            </NavLink>
+        </li>
+        <li class="nav-item px-1">
+            <NavLink class="nav-link disabled" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-cart" aria-hidden="true"></span> Purchase Orders
+            </NavLink>
+        </li>
+        <li class="nav-item px-1">
+            <NavLink class="nav-link disabled" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-document" aria-hidden="true"></span> Sales Orders
+            </NavLink>
+        </li>
+        <li class="nav-item px-1">
+            <NavLink class="nav-link" href="@setupLink" Match="NavLinkMatch.All">
+                <span class="oi oi-cog" aria-hidden="true"></span> Setup
+            </NavLink>
+        </li>
+    </ul>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private string setupLink =>  CompanyFilter != null ? CompanyFilter.Slug + "/setup" : "";
+    private string todoLink =>  CompanyFilter != null ? CompanyFilter.Slug + "/todo" : "";
+    private string pimLink =>  CompanyFilter != null ? CompanyFilter.Slug + "/pim" : "";
+    private string customerLink =>  CompanyFilter != null ? CompanyFilter.Slug + "/customer" : "";
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+    
+}
