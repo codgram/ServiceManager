@@ -24,11 +24,15 @@ namespace ServiceManager.Server.Controllers
             _context = context;
         }
 
-        // GET: api/user
+        // GET: api/user/companyId={companyId}
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Areas.Identity.Data.ServiceManagerUser>>> GetUser()
+        public async Task<ActionResult<IEnumerable<Areas.Identity.Data.ServiceManagerUser>>> GetUserByCompany([FromQuery]string companyId)
         {
-            return await _context.ServiceManagerUser.ToListAsync();
+            var company = await _context.Company.FirstOrDefaultAsync(c => c.CompanyId == companyId);
+            var members = await _context.Member.Where(m => m.CompanyId == company.CompanyId).ToListAsync();
+            var membersArray = members.Select(m => m.ServiceManagerUserId).ToArray();
+            
+            return await _context.ServiceManagerUser.Where(s => membersArray.Contains(s.Id)).ToListAsync();
         }
 
 
@@ -74,16 +78,7 @@ namespace ServiceManager.Server.Controllers
             return user;
         }
 
-        // GET: api/user/companyId={companyId}
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Areas.Identity.Data.ServiceManagerUser>>> GetUserByCompany([FromQuery]string companyId)
-        {
-            var company = await _context.Company.FirstOrDefaultAsync(c => c.CompanyId == companyId);
-            var members = await _context.Member.Where(m => m.CompanyId == company.CompanyId).ToListAsync();
-            var membersArray = members.Select(m => m.ServiceManagerUserId).ToArray();
-            
-            return await _context.ServiceManagerUser.Where(s => membersArray.Contains(s.Id)).ToListAsync();
-        }
+        
         
         
 
