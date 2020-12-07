@@ -86,15 +86,6 @@ namespace ServiceManager.Server.Controllers
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [BindProperty]
         public Member Member { get; set; }
-        [HttpPost]
-        public async Task<ActionResult<Member>> PostMember(Member member)
-        {
-
-            _context.Member.Add(member);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetMember", new { id = member.MemberId }, member);
-        }
 
         // POST: api/member?username={username}
         [HttpPost]
