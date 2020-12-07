@@ -17,10 +17,21 @@ else if(Members.Length == 0) {
     <p>No members yet!</p>
 }
 else {
-    <table class="table table-striped">
+
+
+
+    <div class="row mb-3">
+                <Card Title="Members" Count="@Members.Count().ToString()"/>
+    </div>
+
+
+
+    <div class="table-responsive shadow p-2 rounded bg-white">
+    <table class="table table-striped table-sm">
         <thead>
             <tr>
                 <th>Name</th>
+                <th>Joined Date</th>
                 <th></th>
             </tr>
         </thead>
@@ -30,6 +41,7 @@ else {
                 
                 <tr>
                     <td>@GetUserById(member.ServiceManagerUserId)</td>
+                    <td>@member.CreatedOn</td>
                     <td>
                         @* <a class="btn btn-success" href="@companySlug/product/category/edit/@productCategory.ProductCategoryId">Edit</a> *@
                         @* <button class="btn btn-danger" @onclick="@(() => Delete(room.ChatroomId))">Delete</button> *@
@@ -39,6 +51,7 @@ else {
 
         </tbody>
     </table>
+    </div>
 }
 
 

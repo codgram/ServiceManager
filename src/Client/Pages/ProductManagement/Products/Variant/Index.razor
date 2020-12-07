@@ -3,7 +3,7 @@
 @using ServiceManager.Client.Shared.PIM
 @layout PIMLayout
 
-<a href="@companySlug/product/@productNo/variant/create" class="btn btn-primary">Create</a>
+<a href="@companySlug/product/@productNo/variant/create" class="btn btn-primary mb-2">Create</a>
 <br />
 @if (Variants == null || Product == null)
 {
@@ -15,7 +15,8 @@ else if (Variants.Length == 0)
 }
 else
 {
-    <table class="table table-striped">
+    <div class="table-responsive shadow p-2 rounded bg-white">
+    <table class="table table-striped table-sm">
         <thead>
             <tr>
                 <th>Variant No</th>
@@ -55,7 +56,7 @@ else
 
         </tbody>
     </table>
-
+</div>
 }
 
 
