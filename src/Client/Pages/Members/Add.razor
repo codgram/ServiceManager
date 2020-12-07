@@ -30,7 +30,7 @@
             Member member = new Member(){
                 CompanyId = Company.CompanyId,  
             };
-            await client.PostAsJsonAsync($"api/member?username{username}", member);
+            await client.PostAsJsonAsync($"api/member?username={username}", member);
         }
         NavigationManager.NavigateTo($"{companySlug}/members");
     }
