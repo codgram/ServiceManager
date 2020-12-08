@@ -1,0 +1,26 @@
+@page "/{companySlug}/procurement/vendor/create"
+@using ServiceManager.Client.Components.Procurment
+@inject Services.CompanyFilter CompanyFilter
+@inject NavigationManager NavigationManager
+@inject HttpClient client
+
+<VendorForm Vendor="@Vendor" OnValidSubmit="@CreateVendor" ButtonText="Create"/>
+
+
+@code { 
+    [Parameter] public string companySlug { get; set; }
+
+    private Vendor Vendor = new Vendor();
+    private Company Company { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+    }
+
+    private async Task CreateVendor() {
+        await client.PostAsJsonAsync($"api/vendor?companyId={Company.CompanyId}", Vendor);
+        NavigationManager.NavigateTo($"{companySlug}/procurement/vendor");
+    }
+}

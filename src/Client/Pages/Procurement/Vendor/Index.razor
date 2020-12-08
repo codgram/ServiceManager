@@ -1,0 +1,108 @@
+@page "/{companySlug}/procurement/vendor"
+@inject Services.CompanyFilter CompanyFilter
+@inject IJSRuntime JsRuntime
+@inject HttpClient client
+
+
+<h3>@companySlug | Vendors</h3>
+
+<a href="@companySlug/procurement/vendor/create" class="btn btn-primary">Add Vendor</a>
+<br />
+
+
+@if(Vendors == null) {
+    <p>Loading ...</p>
+}
+else if(Vendors.Length == 0) {
+    <p>No vendors yet!</p>
+}
+else {
+
+
+
+    <div class="row mb-3">
+        <Card Title="Vendors" Count="@Vendors.Count().ToString()"/>
+    </div>
+
+
+
+    <div class="table-responsive shadow p-2 rounded bg-white">
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Phone No</th>
+                <th>Email</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Vendor vendor in Vendors)
+            {
+                
+                <tr>
+                    <td>@vendor.Name</td>
+                    <td>@vendor.PhoneNo</td>
+                    <td>@vendor.Email</td>
+                    <td>
+                        <div class="btn-group">
+                          <button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            Action
+                          </button>
+                          <ul class="dropdown-menu" style="height: @height;">
+                            <li><a class="dropdown-item" href="@companySlug/procurement/vendor/@vendor.VendorId/edit">Edit</a></li>                                                    
+                            <li><a class="dropdown-item disabled" href="#">Details</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" @onclick="@(() => DeleteVendor(vendor.VendorId))">Delete</a></li>
+                          </ul>
+                        </div>
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+    </div>
+}
+
+
+
+
+@code {
+
+    [Parameter] public string companySlug { get; set; }
+
+    private Company Company { get; set; }
+
+    private Vendor[] Vendors { get; set; }
+
+    private Vendor Vendor { get; set; }
+
+    private string height { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+
+        Vendors = await client.GetFromJsonAsync<Vendor[]>($"api/vendor?companyId={Company.CompanyId}");
+
+        if(Vendors.Count() < 3) {
+            height = "100px";
+        }
+        else if(Vendors.Count() < 5) {
+            height = "200px";
+        }
+        else {
+            height = "300px";
+        }
+    }
+
+    private async Task DeleteVendor(string vendorId) {
+        Vendor vendor = await client.GetFromJsonAsync<Vendor>($"api/vendor/{vendorId}");
+        if(await JsRuntime.InvokeAsync<bool>("confirm", $"Do you want to delete {vendor.Name}?")){
+                await client.DeleteAsync($"api/vendor/{vendorId}");
+            }
+        await OnInitializedAsync();
+    }
+}

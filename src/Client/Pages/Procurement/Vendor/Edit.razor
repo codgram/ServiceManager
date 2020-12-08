@@ -1,0 +1,35 @@
+@page "/{companySlug}/procurement/vendor/{vendorId}/edit"
+@using ServiceManager.Client.Components.Procurment
+@inject HttpClient client
+@inject IJSRuntime jsRuntime
+@inject NavigationManager NavigationManager
+@using ServiceManager.Client.Shared.PIM
+@layout PIMLayout
+
+
+<VendorForm ButtonText="Save" Vendor="@Vendor" OnValidSubmit="@EditVendor" />
+
+
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+    [Parameter] public string vendorId { get; set; }
+    private Company Company { get; set; }
+    public Vendor Vendor = new Vendor();
+
+    protected override async Task OnInitializedAsync() {
+
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+
+        Vendor = await client.GetFromJsonAsync<Vendor>($"api/Vendor/{vendorId}");
+        
+    }
+
+    private async Task EditVendor() {
+        await client.PutAsJsonAsync($"api/Vendor/{vendorId}", Vendor);
+        await jsRuntime.InvokeVoidAsync("alert", $"Updated Successfully!");
+        NavigationManager.NavigateTo($"/{companySlug}/procurement/vendor");
+    }
+}
