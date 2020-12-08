@@ -102,7 +102,7 @@ namespace ServiceManager.Server.Controllers
         [HttpPost("{productId}")]
         public async Task<ActionResult<Variant>> PostVariant(Variant variant, string productId)
         {
-            
+            variant.VariantNo = await SetVariantNoAsync(productId);
             _context.Variant.Add(variant);
             await _context.SaveChangesAsync();
 
@@ -120,8 +120,13 @@ namespace ServiceManager.Server.Controllers
                 return NotFound();
             }
 
-            _context.Variant.Remove(Variant);
-            await _context.SaveChangesAsync();
+            var variantImage = await _context.VariantImage.FirstOrDefaultAsync(v => v.VariantId == Variant.VariantId);
+
+            if(variantImage == null) {
+                _context.Variant.Remove(Variant);
+                await _context.SaveChangesAsync();
+            }
+            
 
             return Variant;
         }
@@ -129,6 +134,25 @@ namespace ServiceManager.Server.Controllers
         private bool VariantExists(string id)
         {
             return _context.Variant.Any(e => e.VariantId == id);
+        }
+
+        private async Task<string> SetVariantNoAsync(string productId) {
+            Variant lastVariant = await _context.Variant.OrderBy(v => v.VariantNo).LastOrDefaultAsync(v => v.ProductId == productId);
+            int newVariantNo = Convert.ToInt32(lastVariant.VariantNo.Replace("V", "")) + 1;
+            string variantNo = "";
+            if(newVariantNo < 10) {
+                variantNo = "V000" + newVariantNo;
+            }
+            else if(newVariantNo < 100) {
+                variantNo = "V00" + newVariantNo;
+            }
+            else if(newVariantNo < 1000) {
+                variantNo = "V0" + newVariantNo;
+            }
+            else {
+                variantNo = "V" + newVariantNo;
+            }
+            return variantNo;
         }
     }
 }

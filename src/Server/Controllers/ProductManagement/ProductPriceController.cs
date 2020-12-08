@@ -112,7 +112,7 @@ namespace ServiceManager.Server.Controllers
             {
                 return NotFound();
             }
-
+            
             _context.ProductPrice.Remove(ProductPrice);
             await _context.SaveChangesAsync();
 

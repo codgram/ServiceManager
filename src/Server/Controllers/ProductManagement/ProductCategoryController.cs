@@ -102,9 +102,14 @@ namespace ServiceManager.Server.Controllers
             {
                 return NotFound();
             }
+            
+            ProductSubcategory subcategory = await _context.ProductSubcategory.FirstOrDefaultAsync(p => p.ProductCategoryId == productCategory.ProductCategoryId);
 
-            _context.ProductCategory.Remove(productCategory);
-            await _context.SaveChangesAsync();
+            if( subcategory == null) {
+                _context.ProductCategory.Remove(productCategory);
+                await _context.SaveChangesAsync();
+            }
+            
 
             return productCategory;
         }
