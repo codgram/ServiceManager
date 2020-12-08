@@ -3,6 +3,7 @@
 @using ServiceManager.Client.Shared.PIM
 @layout PIMLayout
 @inject IJSRuntime JsRuntime
+@inject Services.Style Style
 
 
 
@@ -37,7 +38,17 @@ else
                     <td>@productCategory.Description</td>
                     <td>
                         <a class="btn btn-success btn-sm" href="@companySlug/product/category/edit/@productCategory.ProductCategoryId">Edit</a>
-                        @* <button class="btn btn-danger" @onclick="@(() => Delete(room.ChatroomId))">Delete</button> *@
+                        <div class="btn-group">
+                          <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            Action
+                          </button>
+                          <ul class="dropdown-menu" style="height: @height;">
+                            <li><a class="dropdown-item" href="@companySlug/product/category/edit/@productCategory.ProductCategoryId">Edit</a></li>                                                     
+                            <li><a class="dropdown-item disabled" href="#">Details</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" @onclick="@(() => DeleteProductCategory(productCategory.ProductCategoryId))">Delete</a></li>
+                          </ul>
+                        </div>
                     </td>
                 </tr>
             }
@@ -54,6 +65,7 @@ else
     private ProductCategory[] productCategories { get; set; }
     private ProductCategory ProductCategory { get; set; }
     private Company Company { get; set; }
+    private string height { get; set; }
 
     protected override async Task OnInitializedAsync() {
         
@@ -61,6 +73,7 @@ else
         CompanyFilter.CompanyId = Company.CompanyId;
         CompanyFilter.Slug = Company.Slug;
         productCategories = await client.GetFromJsonAsync<ProductCategory[]>($"api/productcategory?companyId={Company.CompanyId}");
+        height = Style.GetHeight(productCategories.Count());
     }
 
     private async Task DeleteProductCategory(string productCategoryId) {
