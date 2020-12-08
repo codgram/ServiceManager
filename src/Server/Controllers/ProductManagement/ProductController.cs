@@ -113,7 +113,7 @@ namespace ServiceManager.Server.Controllers
 
             Variant variant = new Variant() {
                 ProductId = product.ProductId,
-                VariantNo="V001",
+                VariantNo="V0001",
                 Type = VariantType.Regular,
                 Variation = "None"
             };
@@ -124,7 +124,7 @@ namespace ServiceManager.Server.Controllers
         }
 
         // DELETE: api/product/5
-        [HttpDelete("/{id}")]
+        [HttpDelete("{id}")]
         public async Task<ActionResult<Product>> DeleteProduct(string id)
         {
             var product = await _context.Product.FindAsync(id);
@@ -133,6 +133,39 @@ namespace ServiceManager.Server.Controllers
                 return NotFound();
             }
 
+            var variants = await _context.Variant.Where(v => v.ProductId == id).ToListAsync();
+            var images = await _context.VariantImage.Where(v => v.Variant.ProductId == id).ToListAsync();
+            var costs = await _context.ProductCost.Where(v => v.Variant.ProductId == id).ToListAsync();
+            var prices = await _context.ProductPrice.Where(v => v.Variant.ProductId == id).ToListAsync();
+            
+            
+            
+
+            // Delete all the product prices
+            foreach(var item in prices) {
+                _context.ProductPrice.Remove(item);
+                await _context.SaveChangesAsync();
+            }
+
+            // Delete all the product costs
+            foreach(var item in costs) {
+                _context.ProductCost.Remove(item);
+                await _context.SaveChangesAsync();
+            }
+
+            // Delete all the product images
+            foreach(var item in images) {
+                _context.VariantImage.Remove(item);
+                await _context.SaveChangesAsync();
+            }
+
+            // Delete all the variants
+            foreach(var item in variants) {
+                _context.Variant.Remove(item);
+                await _context.SaveChangesAsync();
+            }
+
+            // Delete the product
             _context.Product.Remove(product);
             await _context.SaveChangesAsync();
 
