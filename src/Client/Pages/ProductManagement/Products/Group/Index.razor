@@ -4,6 +4,7 @@
 @layout PIMLayout
 @inject IJSRuntime JsRuntime
 @inject NavigationManager NavigationManager
+@inject Services.Style Style
 
 
 <a href="@companySlug/product/group/create" class="btn btn-primary mb-2">Create</a>
@@ -38,7 +39,7 @@ else
                           <button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                             Action
                           </button>
-                          <ul class="dropdown-menu">
+                          <ul class="dropdown-menu" style="height: @height;">
                             <li><a class="dropdown-item" href="@companySlug/product/group/edit/@productGroup.ProductGroupId">Edit</a></li>                                                    
                             <li><a class="dropdown-item disabled" href="#">Details</a></li>
                             <li><hr class="dropdown-divider"></li>
@@ -61,6 +62,7 @@ else
     [Parameter] public string companySlug { get; set; }
     private ProductGroup[] productGroups { get; set; }
     private Company Company { get; set; }
+    private string height { get; set; }
 
     protected override async Task OnInitializedAsync() {
         
@@ -68,6 +70,8 @@ else
         CompanyFilter.CompanyId = Company.CompanyId;
         CompanyFilter.Slug = Company.Slug;
         productGroups = await client.GetFromJsonAsync<ProductGroup[]>($"api/productgroup?companyId={Company.CompanyId}");
+        
+        height = Style.GetHeight(productGroups.Count());
     }
 
     private async Task DeleteProductGroup(string productGroupId) {
