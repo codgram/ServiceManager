@@ -1,15 +1,17 @@
-@page "/{companySlug}/product/{productNo}/variant/{variantNo}/image"
+@page "/{companySlug}/product/{productNo}/variant/{variantNo}/price"
 @inject HttpClient client
 @using ServiceManager.Client.Shared.PIM
+@inject IJSRuntime JsRuntime
+@inject Services.Style Style
 @layout PIMLayout
 
-<a href="@companySlug/product/@productNo/variant/@variantNo/image/create" class="btn btn-primary mb-2">Create</a>
+<a href="@companySlug/product/@productNo/variant/@variantNo/price/create" class="btn btn-primary mb-2">Create</a>
 <br />
-@if (VariantImages == null || Product == null || Variant == null)
+@if (Product == null || Variant == null || ProductPrices == null || Product == null || Variant == null)
 {
     <text>Loading...</text>
 }
-else if (VariantImages.Length == 0)
+else if (ProductPrices.Length == 0 || Products.Length == 0 || Variants.Length == 0 )
 {
     <text>No Records Found</text>
 }
@@ -19,17 +21,19 @@ else
     <table class="table table-striped table-sm">
         <thead>
             <tr>
-                <th>Color</th>
-                <th>URL</th>
+                <th>Price Date</th>
+                <th>Price</th>
+                <th>Currency</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
-            @foreach (VariantImage image in VariantImages)
+            @foreach (ProductPrice price in ProductPrices)
             {
                 <tr>
-                    <td>@image.Color</td>
-                    <td>@image.ImageURL</td>
+                    <td>@price.PriceDate</td>
+                    <td>@price.Price</td>
+                    <td>@price.Currency</td>
                     <td>
                         <div class="btn-group">
                           <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -39,7 +43,7 @@ else
                             <li><a class="dropdown-item disabled" href="">Edit</a></li>                                                    
                             <li><a class="dropdown-item disabled" href="#">Details</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item disabled" >Delete</a></li>
+                            <li><a class="dropdown-item" @onclick="@(() => DeleteProductPrice(price.ProductPriceId))" >Delete</a></li>
                           </ul>
                         </div>
                     </td>
@@ -56,9 +60,10 @@ else
     [Parameter] public string companySlug { get; set; }
     [Parameter] public string productNo { get; set; }
     [Parameter] public string variantNo { get; set; }
+    private string height { get; set; }
 
     private Company Company { get; set; }
-    private VariantImage[] VariantImages { get; set; }
+    private ProductPrice[] ProductPrices { get; set; }
     private Product[] Products { get; set; }
     private Product Product { get; set; }
 
@@ -77,8 +82,16 @@ else
         Variants = await client.GetFromJsonAsync<Variant[]>($"api/variant/{Product.ProductId}");
         Variant = Variants.FirstOrDefault(v => v.ProductId == Product.ProductId && v.VariantNo == variantNo);
         
-        VariantImages = await client.GetFromJsonAsync<VariantImage[]>($"api/VariantImage/{Variant.VariantId}?productId={Variant.ProductId}");
-            
+        ProductPrices = await client.GetFromJsonAsync<ProductPrice[]>($"api/ProductPrice/{Variant.VariantId}");
+        
+        height = Style.GetHeight(ProductPrices.Count());
+    }
+
+    private async Task DeleteProductPrice(string productPriceId) {
+        if(await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete?")) {
+                await client.DeleteAsync($"api/productprice/{productPriceId}");
+            }
+        await OnInitializedAsync();
     }
 
 }
