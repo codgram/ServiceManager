@@ -1,6 +1,8 @@
 @page "/{companySlug}/members"
 @using Models
 @inject HttpClient client
+@inject IJSRuntime JsRuntime
+@inject Services.Style Style
 @inject Services.CompanyFilter CompanyFilter
 
 
@@ -43,8 +45,16 @@ else {
                     <td>@GetUserById(member.ServiceManagerUserId)</td>
                     <td>@member.CreatedOn</td>
                     <td>
-                        @* <a class="btn btn-success" href="@companySlug/product/category/edit/@productCategory.ProductCategoryId">Edit</a> *@
-                        @* <button class="btn btn-danger" @onclick="@(() => Delete(room.ChatroomId))">Delete</button> *@
+                        <div class="btn-group">
+                          <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            Action
+                          </button>
+                          <ul class="dropdown-menu" style="height: @height;">
+                            <li><a class="dropdown-item disabled" href="">Details</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" @onclick="@(() => DeleteMember(member.MemberId))">Delete</a></li>
+                          </ul>
+                        </div>
                     </td>
                 </tr>
             }
@@ -61,7 +71,7 @@ else {
     private Company Company { get; set; }
     private ServiceManagerUser ServiceManagerUser { get; set; }
     private ServiceManagerUser[] ServiceManagerUsers { get; set; } 
-
+    private string height { get; set; }
 
     protected override async Task OnInitializedAsync() {
 
@@ -71,9 +81,19 @@ else {
 
         Members = await client.GetFromJsonAsync<Member[]>($"api/member?companyId={Company.CompanyId}");
         ServiceManagerUsers = await client.GetFromJsonAsync<ServiceManagerUser[]>($"api/user?companyId={Company.CompanyId}");
+
+        height = Style.GetHeight(Members.Count());
     }
 
     private string GetUserById(string userId) {
         return ServiceManagerUsers.FirstOrDefault(s => s.Id == userId).UserName;
+    }
+
+    private async Task DeleteMember(string memberId) {
+        Member member = await client.GetFromJsonAsync<Member>($"api/member/{memberId}");
+        if(await JsRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to remove {GetUserById(member.MemberId)}?")) {
+                await client.DeleteAsync($"api/member/{memberId}");
+            }
+        await OnInitializedAsync();
     }
 }

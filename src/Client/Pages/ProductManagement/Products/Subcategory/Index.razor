@@ -1,6 +1,8 @@
 @page "/{companySlug}/product/subcategory"
 @inject HttpClient client
+@inject IJSRuntime JsRuntime
 @using ServiceManager.Client.Shared.PIM
+@inject Services.Style Style
 @layout PIMLayout
 
 
@@ -40,11 +42,11 @@ else
                           <button type="button" class="btn btn-sm btn-danger dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                             Action
                           </button>
-                          <ul class="dropdown-menu">
+                          <ul class="dropdown-menu" style="height: @height;">
                             <li><a class="dropdown-item" href="@companySlug/product/subcategory/edit/@productSubcategory.ProductSubcategoryId">Edit</a></li>                                                    
                             <li><a class="dropdown-item disabled" href="#">Details</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item disabled" >Delete</a></li>
+                            <li><a class="dropdown-item" @onclick="@(() => DeleteProductSubcategory(productSubcategory.ProductSubcategoryId))">Delete</a></li>
                           </ul>
                         </div>
                     </td>
@@ -62,6 +64,7 @@ else
     [Parameter] public string companySlug { get; set; }
     private ProductSubcategory[] productSubcategories { get; set; }
     private Company Company { get; set; }
+    private string height { get; set; }
 
     protected override async Task OnInitializedAsync() {
         
@@ -71,5 +74,14 @@ else
         CompanyFilter.Slug = Company.Slug;
 
         productSubcategories = await client.GetFromJsonAsync<ProductSubcategory[]>($"api/productsubcategory?companyId={Company.CompanyId}");
+        
+        height = Style.GetHeight(productSubcategories.Count());
+    }
+
+    private async Task DeleteProductSubcategory(string productSubcategoryId) {
+        if(await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete?")) {
+                await client.DeleteAsync($"api/productsubcategory/{productSubcategoryId}");
+            }
+        await OnInitializedAsync();
     }
 }

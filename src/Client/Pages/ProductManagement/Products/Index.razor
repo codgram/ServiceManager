@@ -2,7 +2,8 @@
 @inject HttpClient client
 @using ServiceManager.Client.Shared.PIM
 @layout PIMLayout
-
+@inject IJSRuntime JsRuntime
+@inject Services.Style Style
 
 <a href="@companySlug/product/create" class="btn btn-primary mb-2">Create</a>
 <br />
@@ -22,6 +23,7 @@ else
             <tr>
                 <th>Product No</th>
                 <th>Description</th>
+                <th>Variations</th>
                 <th></th>
             </tr>
         </thead>
@@ -31,9 +33,22 @@ else
                 <tr>
                     <td>@product.ProductNo</td>
                     <td>@product.Description</td>
+                    <td>@GetProductVariants(product.ProductId)</td>
                     <td>
-                        @* <a class="btn btn-success btn-sm" href="@companySlug/product/@product.ProductNo/variant">Variants</a>
-                        <a class="btn btn-success btn-sm" href="@companySlug/product/@product.ProductNo/variant/add">Add Variant</a> *@
+                        <div class="btn-group">
+                          <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            Action
+                          </button>
+                          <ul class="dropdown-menu" style="height: @height;">
+                            <li><a class="dropdown-item" href="@companySlug/product/@product.ProductNo/variant">Variants</a></li> 
+                            <li><a class="dropdown-item" href="@companySlug/product/@product.ProductNo/variant/create">Add Variant</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="">Edit</a></li>                                                     
+                            <li><a class="dropdown-item disabled" href="#">Details</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" @onclick="@(() => DeleteProduct(product.ProductId))">Delete</a></li>
+                          </ul>
+                        </div>
                     </td>
                 </tr>
             }
@@ -46,9 +61,12 @@ else
 
 
 @code {
+
     [Parameter] public string companySlug { get; set; }
     private Product[] products { get; set; }
     private Company Company { get; set; }
+    private Variant[] variants { get; set; }
+    private string height { get; set; }
 
     protected override async Task OnInitializedAsync() {
         
@@ -58,6 +76,22 @@ else
         CompanyFilter.Slug = Company.Slug;
 
         products = await client.GetFromJsonAsync<Product[]>($"api/product?companyId={Company.CompanyId}");
+        variants = await client.GetFromJsonAsync<Variant[]>($"api/variant?companyId={Company.CompanyId}");
+
+
+        height = Style.GetHeight(products.Count());
+    }
+
+    private async Task DeleteProduct(string productId) {
+        Product product = await client.GetFromJsonAsync<Product>($"api/product/{productId}");
+        if(await JsRuntime.InvokeAsync<bool>("confirm", $"Do you want to delete {product.ProductNo}?")){
+                await client.DeleteAsync($"api/product/{productId}");
+            }
+        await OnInitializedAsync();
+    }
+
+    private int GetProductVariants(string productId) {
+        return variants.Where(v => v.ProductId == productId).Count();
     }
 
 }
