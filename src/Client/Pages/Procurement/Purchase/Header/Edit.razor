@@ -1,0 +1,35 @@
+@page "/{companySlug}/procurement/purchase/header/{purchaseHeaderId}/edit"
+@using ServiceManager.Client.Components.Procurment
+@inject HttpClient client
+@inject IJSRuntime jsRuntime
+@inject NavigationManager NavigationManager
+@using ServiceManager.Client.Shared.PIM
+@layout PIMLayout
+
+
+<PurchaseHeaderForm ButtonText="Save" PurchaseHeader="@PurchaseHeader" OnValidSubmit="@EditPurchaseHeader" />
+
+
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+    [Parameter] public string PurchaseHeaderId { get; set; }
+    private Company Company { get; set; }
+    public PurchaseHeader PurchaseHeader = new PurchaseHeader();
+
+    protected override async Task OnInitializedAsync() {
+
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+
+        PurchaseHeader = await client.GetFromJsonAsync<PurchaseHeader>($"api/PurchaseHeader/{PurchaseHeaderId}");
+        
+    }
+
+    private async Task EditPurchaseHeader() {
+        await client.PutAsJsonAsync($"api/PurchaseHeader/{PurchaseHeaderId}", PurchaseHeader);
+        await jsRuntime.InvokeVoidAsync("alert", $"Updated Successfully!");
+        NavigationManager.NavigateTo($"/{companySlug}/procurement/purchase/header");
+    }
+}

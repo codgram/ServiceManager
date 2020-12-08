@@ -1,0 +1,45 @@
+@inject HttpClient client
+
+<EditForm Model="@PurchaseHeader" OnValidSubmit="@OnValidSubmit">
+    <DataAnnotationsValidator />
+
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="form-group">
+                <label class="control-label">
+                    Document Type</label>
+                    <InputSelect class ="form-control" @bind-Value="PurchaseHeader.VendorId">
+                        <option value="">Select ...</option>
+                        @if(Vendors == null) {
+                            <option>Loading product groups</option>
+                        }
+                        else if(Vendors.Length == 0) {
+                            <option>you need to create groups</option>
+                        }
+                        else {
+                            @foreach(var vendor in Vendors) {
+                            <option value="@vendor.VendorId">@vendor.Name</option>
+                            }
+                        }
+                        
+                    </InputSelect>
+                
+            </div>
+    </div>
+</div>
+    
+    <button type="submit" class="btn btn-success">
+        @ButtonText
+    </button>
+
+</EditForm>
+
+
+@code {
+    [Parameter] public PurchaseHeader PurchaseHeader { get; set; }
+    [Parameter] public Vendor[] Vendors { get; set; }
+    [Parameter] public string ButtonText { get; set; } = "Save";
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+}

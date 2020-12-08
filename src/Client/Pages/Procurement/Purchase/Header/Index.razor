@@ -1,0 +1,94 @@
+@page "/{companySlug}/procurement/purchase/header"
+@inject Services.CompanyFilter CompanyFilter
+@inject IJSRuntime JsRuntime
+@inject HttpClient client
+
+
+<h3>@companySlug | PurchaseHeaders</h3>
+
+<a href="@companySlug/procurement/purchase/header/create" class="btn btn-primary">Add PurchaseHeader</a>
+<br />
+
+
+@if(PurchaseHeaders == null) {
+    <p>Loading ...</p>
+}
+else if(PurchaseHeaders.Length == 0) {
+    <p>No PurchaseHeaders yet!</p>
+}
+else {
+
+
+
+    <div class="row mb-3">
+        <Card Title="PurchaseHeaders" Count="@PurchaseHeaders.Count().ToString()"/>
+    </div>
+
+
+
+    <div class="table-responsive shadow p-2 rounded bg-white">
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <th>Order No</th>
+                <th>Vendor</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (PurchaseHeader PurchaseHeader in PurchaseHeaders)
+            {
+                
+                <tr>
+                    <td>@PurchaseHeader.PurchaseOrderNo</td>
+                    <td>@PurchaseHeader.Vendor.Name</td>
+                    <td>
+                        <div class="btn-group">
+                          <button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            Action
+                          </button>
+                          <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="@companySlug/procurement/Purchase/header/@PurchaseHeader.PurchaseHeaderId/edit">Edit</a></li>                                                    
+                            <li><a class="dropdown-item disabled" href="#">Details</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" @onclick="@(() => DeletePurchaseHeader(PurchaseHeader.PurchaseHeaderId))">Delete</a></li>
+                          </ul>
+                        </div>
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+    </div>
+}
+
+
+
+
+@code {
+
+    [Parameter] public string companySlug { get; set; }
+
+    private Company Company { get; set; }
+
+    private PurchaseHeader[] PurchaseHeaders { get; set; }
+
+    private PurchaseHeader PurchaseHeader { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+
+        PurchaseHeaders = await client.GetFromJsonAsync<PurchaseHeader[]>($"api/PurchaseHeader?companyId={Company.CompanyId}");
+    }
+
+    private async Task DeletePurchaseHeader(string PurchaseHeaderId) {
+        PurchaseHeader PurchaseHeader = await client.GetFromJsonAsync<PurchaseHeader>($"api/PurchaseHeader/{PurchaseHeaderId}");
+        if(await JsRuntime.InvokeAsync<bool>("confirm", $"Do you want to delete {PurchaseHeader.PurchaseOrderNo}?")){
+                await client.DeleteAsync($"api/PurchaseHeader/{PurchaseHeaderId}");
+            }
+        await OnInitializedAsync();
+    }
+}
