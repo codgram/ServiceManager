@@ -32,9 +32,15 @@ namespace ServiceManager.Server.Controllers
         // GET: api/ProductPrice?companyId{companyId}
         [HttpGet]
         [EnableCors("Development")]
-        public async Task<ActionResult<IEnumerable<ProductPrice>>> GetProductPrice([FromQuery] string companyId)
+        public async Task<ActionResult<IEnumerable<ProductPrice>>> GetProductPrice([FromQuery] string companyId, [FromQuery] bool productIsActive)
         {
-            return await _context.ProductPrice.Where(v => v.Variant.Product.CompanyId == companyId).ToListAsync();
+            if(productIsActive == true) {
+                return await _context.ProductPrice.Where(v => v.Variant.Product.CompanyId == companyId && v.Variant.Product.IsActive == true).ToListAsync();
+            }
+            else {
+                return await _context.ProductPrice.Where(v => v.Variant.Product.CompanyId == companyId).ToListAsync();
+            }
+            
         }
 
 

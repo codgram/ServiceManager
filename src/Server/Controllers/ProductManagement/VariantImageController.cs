@@ -32,9 +32,15 @@ namespace ServiceManager.Server.Controllers
         // GET: api/VariantImage?companyId{companyId}
         [HttpGet]
         [EnableCors("Development")]
-        public async Task<ActionResult<IEnumerable<VariantImage>>> GetVariantImage([FromQuery] string companyId)
+        public async Task<ActionResult<IEnumerable<VariantImage>>> GetVariantImage([FromQuery] string companyId, [FromQuery] bool productIsAcive)
         {
-            return await _context.VariantImage.Where(v => v.Variant.Product.CompanyId == companyId).ToListAsync();
+            if(productIsAcive == true) {
+                return await _context.VariantImage.Where(v => v.Variant.Product.CompanyId == companyId && v.Variant.Product.IsActive == true).ToListAsync();
+            }
+            else {
+                return await _context.VariantImage.Where(v => v.Variant.Product.CompanyId == companyId).ToListAsync();
+            }
+            
         }
 
 

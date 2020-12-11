@@ -32,9 +32,15 @@ namespace ServiceManager.Server.Controllers
         // GET: api/Variant?companyId{companyId}
         [HttpGet]
         [EnableCors("Development")]
-        public async Task<ActionResult<IEnumerable<Variant>>> GetVariant([FromQuery] string companyId)
+        public async Task<ActionResult<IEnumerable<Variant>>> GetVariant([FromQuery] string companyId, [FromQuery] bool productIsActive)
         {
-            return await _context.Variant.Include(v => v.Product).Where(v => v.Product.CompanyId == companyId).ToListAsync();
+            if(productIsActive == true) {
+                return await _context.Variant.Include(v => v.Product).Where(v => v.Product.CompanyId == companyId && v.Product.IsActive == true).ToListAsync();
+            }
+            else {
+                return await _context.Variant.Include(v => v.Product).Where(v => v.Product.CompanyId == companyId).ToListAsync();
+            }
+            
         }
 
 

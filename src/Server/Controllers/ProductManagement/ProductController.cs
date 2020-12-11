@@ -32,9 +32,15 @@ namespace ServiceManager.Server.Controllers
         // GET: api/product?companyId={companyId}
         [HttpGet]
         [EnableCors("Development")]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProduct([FromQuery] string companyId)
+        public async Task<ActionResult<IEnumerable<Product>>> GetProduct([FromQuery] string companyId, [FromQuery] bool IsActive)
         {
-            return await _context.Product.Include(d => d.Company).Where(p => p.CompanyId == companyId).ToListAsync(); 
+            if(IsActive == true) {
+                return await _context.Product.Include(d => d.Company).Where(p => p.CompanyId == companyId && p.IsActive == true).ToListAsync(); 
+            }
+            else {
+                return await _context.Product.Include(d => d.Company).Where(p => p.CompanyId == companyId).ToListAsync(); 
+            }
+            
         }
         
         // GET: api/product/n/{productNo}?companyId={companyId}
@@ -104,7 +110,6 @@ namespace ServiceManager.Server.Controllers
         public async Task<ActionResult<Product>> PostProduct(Product product, string companyId)
         {
             product.CompanyId = companyId;
-            product.IsActice = true;
 
 
             
