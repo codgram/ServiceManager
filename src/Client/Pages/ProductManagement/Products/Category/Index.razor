@@ -37,7 +37,6 @@ else
                     <td>@productCategory.Name</td>
                     <td>@productCategory.Description</td>
                     <td>
-                        <a class="btn btn-success btn-sm" href="@companySlug/product/category/edit/@productCategory.ProductCategoryId">Edit</a>
                         <div class="btn-group">
                           <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                             Action
@@ -78,7 +77,7 @@ else
 
     private async Task DeleteProductCategory(string productCategoryId) {
         var productCategory = await client.GetFromJsonAsync<ProductCategory>($"api/productcategory/{productCategoryId}");
-        if(await JsRuntime.InvokeAsync<bool>("comfirm", $"Do you want to delete {productCategory.Name}?")){
+        if(await JsRuntime.InvokeAsync<bool>("confirm", $"Do you want to delete {productCategory.Name}?")){
                     await client.DeleteAsync($"api/productcategory/{productCategoryId}");
             }
         await OnInitializedAsync();
