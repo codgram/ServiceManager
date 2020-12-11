@@ -1,20 +1,21 @@
-@page "/{companySlug}/product/{productId}/edit"
+@page "/{companySlug}/procurement/vendor/{vendorId}/edit"
+@using ServiceManager.Client.Components.Procurment
 @inject HttpClient client
 @inject IJSRuntime jsRuntime
 @inject NavigationManager NavigationManager
-@using ServiceManager.Client.Components.Product
 @using ServiceManager.Client.Shared.PIM
 @layout PIMLayout
 
 
-<ProductForm ButtonText="Save" Vendor="@Product" OnValidSubmit="@EditProduct" />
+<VendorForm ButtonText="Save" Vendor="@Vendor" OnValidSubmit="@EditVendor" />
+
+
 
 @code {
     [Parameter] public string companySlug { get; set; }
-    [Parameter] public string productId { get; set; }
-
+    [Parameter] public string vendorId { get; set; }
     private Company Company { get; set; }
-    public Product Product = new Product();
+    public Vendor Vendor = new Vendor();
 
     protected override async Task OnInitializedAsync() {
 
@@ -22,13 +23,13 @@
         CompanyFilter.CompanyId = Company.CompanyId;
         CompanyFilter.Slug = Company.Slug;
 
-        Product = await client.GetFromJsonAsync<Product>($"api/Product/{productId}");
+        Vendor = await client.GetFromJsonAsync<Vendor>($"api/Vendor/{vendorId}");
         
     }
 
-    private async Task EditProduct() {
-        await client.PutAsJsonAsync($"api/Product/{productId}", Product);
+    private async Task EditVendor() {
+        await client.PutAsJsonAsync($"api/Vendor/{vendorId}", Vendor);
         await jsRuntime.InvokeVoidAsync("alert", $"Updated Successfully!");
-        NavigationManager.NavigateTo($"/{companySlug}/procurement/Product");
+        NavigationManager.NavigateTo($"/{companySlug}/procurement/vendor");
     }
 }

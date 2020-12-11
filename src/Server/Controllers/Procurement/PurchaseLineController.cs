@@ -31,11 +31,11 @@ namespace ServiceManager.Server.Controllers.Procurement
             return await _context.PurchaseLine.Where(p => p.PurchaseHeader.CompanyId == companyId).ToListAsync();
         }
 
-        // GET: api/PurchaseLine
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<PurchaseLine>>> GetPurchaseLineByOrder([FromQuery] string purchaseHeaderId)
+        // GET: api/PurchaseLine/h/5
+        [HttpGet("h/{purchaseHeaderId}")]
+        public async Task<ActionResult<IEnumerable<PurchaseLine>>> GetPurchaseLineByOrder(string purchaseHeaderId)
         {
-            return await _context.PurchaseLine.Where(p => p.PurchaseHeaderId == purchaseHeaderId).ToListAsync();
+            return await _context.PurchaseLine.Include(p => p.PurchaseHeader).Include(p => p.Product).Include(p => p.Variant).Where(p => p.PurchaseHeaderId == purchaseHeaderId).ToListAsync();
         }
 
 

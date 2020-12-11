@@ -1,8 +1,8 @@
 ﻿@inject Services.CompanyFilter CompanyFilter
-
+@inject HttpClient client
 
 <div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href="">ServiceManager</a>
+    <a class="navbar-brand" href="">@title</a>
     <button class="navbar-toggler" @onclick="ToggleNavMenu">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -31,7 +31,12 @@
             </NavLink>
         </li>
         <li class="nav-item px-1">
-            <NavLink class="nav-link disabled" href="" Match="NavLinkMatch.All">
+            <NavLink class="nav-link" href="@vendorLink" Match="NavLinkMatch.All">
+                <span class="oi oi-person" aria-hidden="true"></span> Vendors
+            </NavLink>
+        </li>
+        <li class="nav-item px-1">
+            <NavLink class="nav-link" href="@purchaseOrderLink" Match="NavLinkMatch.All">
                 <span class="oi oi-cart" aria-hidden="true"></span> Purchase Orders
             </NavLink>
         </li>
@@ -43,6 +48,11 @@
         <li class="nav-item px-1">
             <NavLink class="nav-link" href="@setupLink" Match="NavLinkMatch.All">
                 <span class="oi oi-cog" aria-hidden="true"></span> Setup
+            </NavLink>
+        </li>
+        <li class="nav-item px-1">
+            <NavLink class="nav-link" href="@memberLink" Match="NavLinkMatch.All">
+                <span class="oi oi-person" aria-hidden="true"></span> Members
             </NavLink>
         </li>
     </ul>
@@ -57,9 +67,14 @@
     private string todoLink =>  CompanyFilter != null ? CompanyFilter.Slug + "/todo" : "";
     private string pimLink =>  CompanyFilter != null ? CompanyFilter.Slug + "/pim" : "";
     private string customerLink =>  CompanyFilter != null ? CompanyFilter.Slug + "/customer" : "";
+    private string purchaseOrderLink =>  CompanyFilter != null ? CompanyFilter.Slug + "/procurement/purchase/header" : "";
+    private string vendorLink =>  CompanyFilter != null ? CompanyFilter.Slug + "/procurement/vendor" : "";
+    private string memberLink =>  CompanyFilter != null ? CompanyFilter.Slug + "/members" : "";
+    private string title =>  CompanyFilter != null ? CompanyFilter.Slug  : "Company";
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
     }
+
     
 }

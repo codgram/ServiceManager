@@ -1,0 +1,25 @@
+               
+                
+<div class="col-xl-3 col-md-6 mb-1 py-2">
+    <div class="card border-left-primary shadow h-100 py-2">
+        <div class="card-body">
+            <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                        @Title</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Count</div>
+                </div>
+                <div class="col-auto">
+                    <span class="oi oi-@Icon " aria-hidden="true" data-width="32" data-height="32"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public string Title { get; set; }
+    [Parameter] public string Count { get; set; }
+    [Parameter] public string Icon { get; set; }
+}

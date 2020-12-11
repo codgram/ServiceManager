@@ -25,11 +25,11 @@ namespace ServiceManager.Server.Controllers.Procurement
             _context = context;
         }
 
-        // GET: api/PurchaseHeader/{companyId}
+        // GET: api/PurchaseHeader?companyId={companyId}
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PurchaseHeader>>> GetPurchaseHeader([FromQuery] string companyId)
         {
-            return await _context.PurchaseHeader.Include(p => p.Company).Where(p => p.CompanyId == companyId).ToListAsync();
+            return await _context.PurchaseHeader.Include(p => p.Company).Include(p => p.Vendor).Where(p => p.CompanyId == companyId).ToListAsync();
         }
 
         // GET: api/PurchaseHeader/5
@@ -82,28 +82,49 @@ namespace ServiceManager.Server.Controllers.Procurement
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<PurchaseHeader>> PostPurchaseHeader(PurchaseHeader PurchaseHeader)
+        public async Task<ActionResult<PurchaseHeader>> PostPurchaseHeader(PurchaseHeader purchaseHeader, [FromQuery] string companyId)
         {
-            _context.PurchaseHeader.Add(PurchaseHeader);
+            purchaseHeader.PurchaseOrderNo = await SetPONo(companyId);
+            purchaseHeader.CompanyId = companyId;
+            _context.PurchaseHeader.Add(purchaseHeader);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPurchaseHeader", new { id = PurchaseHeader.PurchaseHeaderId }, PurchaseHeader);
+            return CreatedAtAction("GetPurchaseHeader", new { id = purchaseHeader.PurchaseHeaderId }, purchaseHeader);
         }
 
         // DELETE: api/PurchaseHeader/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<PurchaseHeader>> DeletePurchaseHeader(string id)
         {
-            var PurchaseHeader = await _context.PurchaseHeader.FindAsync(id);
-            if (PurchaseHeader == null)
+            var purchaseHeader = await _context.PurchaseHeader.FindAsync(id);
+            if (purchaseHeader == null)
             {
                 return NotFound();
             }
 
-            _context.PurchaseHeader.Remove(PurchaseHeader);
-            await _context.SaveChangesAsync();
+            // Delete only if the Purchase order is not posted
+            if (purchaseHeader.IsPosted == false)
+            {
+                var lines = await _context.PurchaseLine.Where(p => p.PurchaseHeaderId == purchaseHeader.PurchaseHeaderId).ToListAsync();
 
-            return PurchaseHeader;
+                if (lines != null)
+                {
+                    foreach (var item in lines)
+                    {
+                        _context.PurchaseLine.Remove(item);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                _context.PurchaseHeader.Remove(purchaseHeader);
+                await _context.SaveChangesAsync();
+            }
+
+            
+            
+            
+
+            return purchaseHeader;
         }
 
         private bool PurchaseHeaderExists(string id)
@@ -111,49 +132,62 @@ namespace ServiceManager.Server.Controllers.Procurement
             return _context.PurchaseHeader.Any(e => e.PurchaseHeaderId == id);
         }
 
-        private async Task<string> SetPONo(string companyId) {
+        private async Task<string> SetPONo(string companyId)
+        {
 
-            PurchaseHeader lastPurchaseOrder = await _context.PurchaseHeader.LastOrDefaultAsync(p => p.CompanyId == companyId);
+            PurchaseHeader lastPurchaseOrder = await _context.PurchaseHeader.OrderBy(p => p.PurchaseOrderNo).LastOrDefaultAsync(p => p.CompanyId == companyId);
             DocumentSetup purchaseHeaderSetup = await _context.DocumentSetup.FirstOrDefaultAsync(p => p.CompanyId == companyId && p.DocumentType == DocumentType.Purchase && p.Part == DocumentSetupPart.Prefix);
-            
             string prefix = purchaseHeaderSetup.Content;
-            string year = DateTime.Now.Year.ToString().Split("",2)[1]; //gets the last 2 characters from the year
-            string[] poArray = lastPurchaseOrder.PurchaseOrderNo.Split("-");
-            int no = Convert.ToInt32(poArray[poArray.Length - 1]) + 1; //the new suffix no
-            string newnum = "";
+            string year = DateTime.Now.Year.ToString().Substring(DateTime.Now.Year.ToString().Length - 2); //gets the last 2 characters from the year
 
-
-            if (no < 10)
+            if (lastPurchaseOrder == null)
             {
-                newnum = "-00000" + no;
-            }
-            else if (no < 100)
-            {
-                newnum = "-0000" + no;
-            }
-            else if (no < 1000)
-            {
-                newnum = "-000" + no;
-            }
-            else if (no < 10000)
-            {
-                newnum = "-00" + no;
-            }
-            else if (no < 100000)
-            {
-                newnum = "-0" + no;
-            }
-            else if (no < 1000000)
-            {
-                newnum = "-" + no;
+                return prefix + "-" + year + "-000001";
             }
             else
             {
-                newnum = "contact Codgram";
+
+                string[] poArray = lastPurchaseOrder.PurchaseOrderNo.Split("-");
+                int no = Convert.ToInt32(poArray[poArray.Length - 1]) + 1; //the new suffix no
+                string newnum = "";
+
+
+                if (no < 10)
+                {
+                    newnum = "-00000" + no;
+                }
+                else if (no < 100)
+                {
+                    newnum = "-0000" + no;
+                }
+                else if (no < 1000)
+                {
+                    newnum = "-000" + no;
+                }
+                else if (no < 10000)
+                {
+                    newnum = "-00" + no;
+                }
+                else if (no < 100000)
+                {
+                    newnum = "-0" + no;
+                }
+                else if (no < 1000000)
+                {
+                    newnum = "-" + no;
+                }
+                else
+                {
+                    newnum = "contact Codgram";
+                }
+
+
+                return prefix + "-" + year + newnum;
             }
 
+
             
-            return prefix + "-" + year + newnum;
+            
 
             
         }

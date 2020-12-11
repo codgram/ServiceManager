@@ -1,0 +1,28 @@
+@page "/{companySlug}/procurement/purchase/header/create"
+@using ServiceManager.Client.Components.Procurment
+@inject Services.CompanyFilter CompanyFilter
+@inject NavigationManager NavigationManager
+@inject HttpClient client
+
+<PurchaseHeaderForm PurchaseHeader="@PurchaseHeader" OnValidSubmit="@CreatePurchaseHeader" ButtonText="Create" Company="@Company" companySlug="@companySlug" Vendors="@Vendors"/>
+
+
+@code { 
+    [Parameter] public string companySlug { get; set; }
+
+    private PurchaseHeader PurchaseHeader = new PurchaseHeader();
+    private Company Company { get; set; }
+    private Vendor[] Vendors { get; set; }
+    protected override async Task OnInitializedAsync() {
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+
+        Vendors = await client.GetFromJsonAsync<Vendor[]>($"api/vendor?companyId={Company.CompanyId}");
+    }
+
+    private async Task CreatePurchaseHeader() {
+        await client.PostAsJsonAsync($"api/PurchaseHeader?companyId={Company.CompanyId}", PurchaseHeader);
+        NavigationManager.NavigateTo($"{companySlug}/procurement/purchase/{PurchaseHeader.PurchaseHeaderId}/line");
+    }
+}

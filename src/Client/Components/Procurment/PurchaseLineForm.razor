@@ -1,0 +1,89 @@
+@inject HttpClient client
+
+
+<EditForm Model="@PurchaseLine" OnValidSubmit="@OnValidSubmit">
+    <DataAnnotationsValidator />
+
+<div class="row">
+    <div class="col">
+        <div class="form-group">
+            <label class="control-label">Product</label>
+                <InputSelect class ="form-control" @bind-Value="PurchaseLine.ProductId">
+                    <option value="">Select ...</option>
+                    @if(Products == null) {
+                        <option>Loading products</option>
+                    }
+                    else if(Products.Length == 0) {
+                        <option>you need to create category</option>
+                    }
+                    else {
+                        @foreach(Product product in Products) {
+                        <option value="@product.ProductId">@product.ProductNo | @product.Description</option>
+                        }
+                    }
+                </InputSelect>
+        </div>
+        <div class="form-group">
+            <label class="control-label">Variant</label>
+                <InputSelect class ="form-control" @bind-Value="PurchaseLine.VariantId">
+                    <option value="">Select ...</option>
+                    @if(Variants == null) {
+                        <option>Loading products</option>
+                    }
+                    else if(Variants.Length == 0) {
+                        <option>you need to create product</option>
+                    }
+                    else if(PurchaseLine.ProductId == null) {
+                        <option>Please select a product</option>
+                    }
+                    else {
+                        @foreach(Variant variant in Variants.Where(v => v.ProductId == PurchaseLine.ProductId)) {
+                        <option value="@variant.VariantId">@variant.VariantNo| @variant.Variation</option>
+                        }
+                    }
+                </InputSelect>
+        </div>
+    </div>
+    <div class="col">
+        <div class="form-group">
+            <label class="control-label">Quantity</label>
+            <input class="form-control" @bind="@PurchaseLine.Quantity" />
+            <ValidationMessage For="@(() => PurchaseLine.Quantity)" />
+        </div>
+    </div>
+    <div class="col">
+        <div class="form-group">
+            <label class="control-label">Cost</label>
+            <input class="form-control" @bind="@PurchaseLine.UnitCost" />
+            <ValidationMessage For="@(() => PurchaseLine.UnitCost)" />
+        </div>
+    </div>
+    <div class="col">
+        <div class="form-group">
+            <label class="control-label">Discount</label>
+            <input class="form-control" @bind="@PurchaseLine.LineDiscount"/>
+            <ValidationMessage For="@(() => PurchaseLine.LineDiscount)" />
+        </div>
+    </div>
+    <div class="col">
+        <div class="form-group">
+            <label class="control-label">Action</label>
+            <button type="submit" class="btn btn-success form-control">
+                @ButtonText
+            </button>
+        </div>
+       
+    </div>
+</div>
+</EditForm>
+
+@code {
+    [Parameter] public Company Company { get; set; }
+    [Parameter] public string companySlug { get; set; }
+    [Parameter] public Product[] Products { get; set; }
+    [Parameter] public Variant[] Variants { get; set; }
+    [Parameter] public string ButtonText { get; set; } = "Save";
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public PurchaseLine PurchaseLine { get; set; }
+
+}

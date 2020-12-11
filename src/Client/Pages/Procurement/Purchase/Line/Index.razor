@@ -1,0 +1,103 @@
+@page "/{companySlug}/procurement/purchase/{purchaseHeaderId}/line"
+@using ServiceManager.Client.Components.Procurment
+@inject Services.CompanyFilter CompanyFilter
+@inject HttpClient client
+
+
+@if(PurchaseHeader != null && PurchaseHeader.IsPosted == false) {
+    <PurchaseLineForm ButtonText="Add" PurchaseLine="@purchaseLine" OnValidSubmit="@AddLine" Products="@Products" Variants="@Variants" companySlug="@companySlug"/>
+}
+
+
+
+
+@if(PurchaseLines != null) {
+    <div class="table-responsive shadow p-2 rounded bg-white mt-3">
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <th>Product No</th>
+                <th>Variant No</th>
+                <th>Quantity</th>
+                <th>Unit Cost</th>
+                <th>Line Discount</th>
+                <th>Total Cost</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (PurchaseLine line in PurchaseLines)
+            {
+                <tr>
+                    <td>
+                        <a data-bs-toggle="tooltip" title="@GetProductDetail(line.Product.ProductId)">@line.Product.ProductNo</a>
+                    </td>
+                    <td>@line.Variant.VariantNo</td>
+                    <td>@line.Quantity</td>
+                    <td>@line.UnitCost</td>
+                    <td>@line.LineDiscount</td>
+                    <td>@line.TotalCost</td>
+                    <td>
+                        @* <div class="btn-group">
+                          <button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            Action
+                          </button>
+                          <ul class="dropdown-menu" style="height: @height;">
+                            <li><a class="dropdown-item" href="@companySlug/procurement/vendor/@vendor.VendorId/edit">Edit</a></li>                                                    
+                            <li><a class="dropdown-item disabled" href="#">Details</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" @onclick="@(() => DeleteVendor(vendor.VendorId))">Delete</a></li>
+                          </ul>
+                        </div> *@
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+        <tfoot>
+            <td></td>
+            <td></td>
+            <td>@PurchaseLines.Sum(p => p.Quantity)</td>
+            <td>@PurchaseLines.Sum(p => p.UnitCost)</td>
+            <td>@PurchaseLines.Sum(p => p.LineDiscount)</td>
+            <td><strong>@PurchaseLines.Sum(p => p.TotalCost)</strong></td>
+        </tfoot>
+    </table>
+    </div>
+}
+
+
+@code {
+    [Parameter] public string companySlug { get; set; }
+    [Parameter] public string purchaseHeaderId { get; set; }
+    private Company Company { get; set; }
+    private PurchaseLine purchaseLine = new PurchaseLine();
+    private PurchaseLine[] PurchaseLines { get; set; }
+
+    private PurchaseHeader PurchaseHeader { get; set; }
+
+    private Product[] Products { get; set; }
+    private Variant[] Variants { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
+        CompanyFilter.CompanyId = Company.CompanyId;
+        CompanyFilter.Slug = Company.Slug;
+        PurchaseHeader = await client.GetFromJsonAsync<PurchaseHeader>($"api/purchaseheader/{purchaseHeaderId}");
+        PurchaseLines = await client.GetFromJsonAsync<PurchaseLine[]>($"api/purchaseline/h/{purchaseHeaderId}");
+        Products = await client.GetFromJsonAsync<Product[]>($"api/product?companyId={Company.CompanyId}");
+        Variants = await client.GetFromJsonAsync<Variant[]>($"api/variant?companyId={Company.CompanyId}");
+    }
+
+    private async Task AddLine() {
+        purchaseLine.PurchaseHeaderId = purchaseHeaderId;
+        await client.PostAsJsonAsync($"api/purchaseline", purchaseLine);
+        purchaseLine = new PurchaseLine();
+        await OnInitializedAsync();
+    }
+
+    private string GetProductDetail(string productId) {
+        var product = Products.FirstOrDefault(p => p.ProductId == productId);
+        return product.Brand + " | " + product.Description + " | " + product.Size;
+    }
+}

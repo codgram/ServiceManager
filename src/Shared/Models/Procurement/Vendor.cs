@@ -28,6 +28,7 @@ namespace ServiceManager.Shared.Models.Procurement
         [EmailAddress]
         public string Email { get; set; }
         
+        public bool IsActive { get; set; }
 
     }
 }

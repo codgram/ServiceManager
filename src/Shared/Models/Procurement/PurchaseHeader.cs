@@ -15,6 +15,12 @@ namespace ServiceManager.Shared.Models.Procurement
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime ModifiedOn { get; set; } = DateTime.Now;
+        
+        [DataType(DataType.Date)]
+        public DateTime OrderDate { get; set; }
+
+        [DataType(DataType.Date)]
+        public DateTime PostedDate { get; set; }
 
         public string CompanyId { get; set; }
         public Company Company { get; set; }
@@ -23,7 +29,7 @@ namespace ServiceManager.Shared.Models.Procurement
         public string VendorId { get; set; }
         public Vendor Vendor { get; set; }
 
-        public bool Posted { get; set; }
+        public bool IsPosted { get; set; }
 
 
     }

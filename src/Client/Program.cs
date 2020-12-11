@@ -26,6 +26,7 @@ namespace ServiceManager.Client
             builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("ServiceManager.ServerAPI"));
 
             builder.Services.AddScoped<CompanyFilter>();
+            builder.Services.AddScoped<Style>();
 
             builder.Services.AddApiAuthorization();
 

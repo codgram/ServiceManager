@@ -31,6 +31,6 @@ namespace ServiceManager.Shared.Models.SalesManagement
         [EmailAddress]
         public string Email { get; set; }
         
-
+        public bool IsActive { get; set; }
     }
 }

@@ -4,7 +4,7 @@
 @layout SetupLayout
 
 
-<a href="@companySlug/setup/documents/create" class="btn btn-primary">Create</a>
+<a href="@companySlug/setup/documents/create" class="btn btn-primary mb-2">Create</a>
 <hr >
 
 @if (setups == null)
@@ -17,7 +17,8 @@ else if (setups.Length == 0)
 }
 else
 {
-    <table class="table table-striped">
+    <div class="table-responsive p-2 rounded bg-white">
+    <table class="table table-striped table-sm">
         <thead>
             <tr>
                 <th>Company</th>
@@ -44,6 +45,7 @@ else
 
         </tbody>
     </table>
+    </div>
 }
 
 

@@ -1,10 +1,12 @@
 @page "/{companySlug}/product/subcategory"
 @inject HttpClient client
+@inject IJSRuntime JsRuntime
 @using ServiceManager.Client.Shared.PIM
+@inject Services.Style Style
 @layout PIMLayout
 
 
-<a href="@companySlug/product/subcategory/create" class="btn btn-primary">Create</a>
+<a href="@companySlug/product/subcategory/create" class="btn btn-primary mb-2">Create</a>
 <br />
 @if (productSubcategories == null)
 {
@@ -16,7 +18,8 @@ else if (productSubcategories.Length == 0)
 }
 else
 {
-    <table class="table table-striped">
+    <div class="table-responsive p-2 rounded bg-white">
+    <table class="table table-striped table-sm">
         <thead>
             <tr>
                 <th>Group</th>
@@ -36,14 +39,14 @@ else
                     <td>@productSubcategory.Description</td>
                     <td>
                         <div class="btn-group">
-                          <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                          <button type="button" class="btn btn-sm btn-danger dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                             Action
                           </button>
-                          <ul class="dropdown-menu">
+                          <ul class="dropdown-menu" style="height: @height;">
                             <li><a class="dropdown-item" href="@companySlug/product/subcategory/edit/@productSubcategory.ProductSubcategoryId">Edit</a></li>                                                    
                             <li><a class="dropdown-item disabled" href="#">Details</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item disabled" >Delete</a></li>
+                            <li><a class="dropdown-item" @onclick="@(() => DeleteProductSubcategory(productSubcategory.ProductSubcategoryId))">Delete</a></li>
                           </ul>
                         </div>
                     </td>
@@ -52,7 +55,7 @@ else
 
         </tbody>
     </table>
-
+</div>
 }
 
 
@@ -61,6 +64,7 @@ else
     [Parameter] public string companySlug { get; set; }
     private ProductSubcategory[] productSubcategories { get; set; }
     private Company Company { get; set; }
+    private string height { get; set; }
 
     protected override async Task OnInitializedAsync() {
         
@@ -70,5 +74,14 @@ else
         CompanyFilter.Slug = Company.Slug;
 
         productSubcategories = await client.GetFromJsonAsync<ProductSubcategory[]>($"api/productsubcategory?companyId={Company.CompanyId}");
+        
+        height = Style.GetHeight(productSubcategories.Count());
+    }
+
+    private async Task DeleteProductSubcategory(string productSubcategoryId) {
+        if(await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete?")) {
+                await client.DeleteAsync($"api/productsubcategory/{productSubcategoryId}");
+            }
+        await OnInitializedAsync();
     }
 }

@@ -4,24 +4,146 @@
 
 
 
+@if (PurchaseHeaders != null && Customers != null && SalesHeaders != null)
+{
+    <div class="row mb-3">
+
+        
+
+        <Card Title="Purchase Orders" Count="@PurchaseHeaders.Count().ToString()" Icon="cart" />
+
+        <Card Title="Sales Orders" Count="@SalesHeaders.Count().ToString()" Icon="document" />
+
+        <Card Title="Products" Count="@Products.Count().ToString()" Icon="document" />
+
+        <Card Title="Variations" Count="@Variants.Count().ToString()" Icon="document" />
+
+        <Card Title="Customers" Count="@Customers.Count().ToString()" Icon="people" />
+
+        <Card Title="Vendors" Count="@Vendors.Count().ToString()" Icon="people" />
+
+    </div>
+    <ul class="nav nav-pills mb-3 shadow p-2 bg-white" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="pills-data-tab" data-toggle="pill" href="#pills-data" role="tab"
+                aria-controls="pills-data" aria-selected="true">Data</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="pills-graph-tab" data-toggle="pill" href="#pills-graph" role="tab"
+                aria-controls="pills-graph" aria-selected="false"
+                onclick="exampleJsFunctions.returnArrayAsyncJs()">Graph</a>
+        </li>
+    </ul>
+
+    <div class="tab-content shadow p-2 rounded bg-white" id="pills-tabContent">
 
 
-<p>@testAppDataService</p>
+        <div class="tab-pane fade show active" id="pills-data" role="tabpanel" aria-labelledby="pills-data-tab">
+            <div class="table-responsive">
+                <table class="table table-sm table-stripped">
+                  <caption>List of Orders</caption>
+                  <thead>
+                          <tr>
+                              <th>Type</th>
+                              <th>Order No</th>
+                              <th></th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          @foreach (PurchaseHeader purchase in PurchaseHeaders)
+                          {
+
+                              <tr>
+                                  <td>Purchase Order</td>
+                                  <td>@purchase.PurchaseOrderNo</td>
+                                  <td>
+                                      <div class="btn-group">
+                                        <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                          Action
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                          <li><a class="dropdown-item disabled">Edit</a></li>                                                    
+                                          <li><a class="dropdown-item disabled" href="#">Details</a></li>
+                                          <li><hr class="dropdown-divider"></li>
+                                          <li><a class="dropdown-item disabled">Delete</a></li>
+                                        </ul>
+                                      </div>
+                                  </td>
+                              </tr>
+                          }
+                          @foreach (SalesHeader sale in SalesHeaders)
+                          {
+
+                              <tr>
+                                  <td>Sales Order</td>
+                                  <td>@sale.SalesOrderNo</td>
+                                  <td>
+                                      <div class="btn-group">
+                                        <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                          Action
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                          <li><a class="dropdown-item disabled">Edit</a></li>                                                    
+                                          <li><a class="dropdown-item disabled" href="#">Details</a></li>
+                                          <li><hr class="dropdown-divider"></li>
+                                          <li><a class="dropdown-item disabled">Delete</a></li>
+                                        </ul>
+                                      </div>
+                                  </td>
+                              </tr>
+                          }
+                      </tbody>
+                </table>
+            </div>
+
+        </div>
+
+
+
+        <div class="tab-pane fade" id="pills-graph" role="tabpanel" aria-labelledby="pills-graph-tab">
+            <canvas id="myChart" width="334" height="141" style="display: block; width: 334px; height: 141px;"></canvas>
+        </div>
+
+
+    </div>
+}
+
+
+
+
 
 
 @code {
     [Parameter] public string slug { get; set; }
 
     private Company Company { get; set; }
-
-    private string testAppDataService { get; set; }
-
+    private PurchaseHeader[] PurchaseHeaders { get; set; }
+    private SalesHeader[] SalesHeaders { get; set; }
+    private Customer[] Customers { get; set; }
+    private Product[] Products { get; set; }
+    private Variant[] Variants { get; set; }
+    private Vendor[] Vendors { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={slug}");
         CompanyFilter.CompanyId = Company.CompanyId;
         CompanyFilter.Slug = Company.Slug;
+
+        Customers = await client.GetFromJsonAsync<Customer[]>($"api/customer?companyId={Company.CompanyId}");
+        PurchaseHeaders = await client.GetFromJsonAsync<PurchaseHeader[]>($"api/purchaseheader?companyId={Company.CompanyId}");
+        SalesHeaders = await client.GetFromJsonAsync<SalesHeader[]>($"api/salesheader?companyId={Company.CompanyId}");
+        Products = await client.GetFromJsonAsync<Product[]>($"api/product?companyId={Company.CompanyId}");
+        Variants = await client.GetFromJsonAsync<Variant[]>($"api/variant?companyId={Company.CompanyId}");
+        Vendors = await client.GetFromJsonAsync<Vendor[]>($"api/vendor?companyId={Company.CompanyId}");
+    }
+
+
+    [JSInvokable]
+    public static Task<int[]> ReturnArrayAsync()
+    {
+        return Task.FromResult(new int[] { 1, 2, 3 });
+
     }
 
 }
