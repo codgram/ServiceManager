@@ -12,7 +12,7 @@ namespace ServiceManager.Client.Services
                 return "200px";
             }
             else {
-                return "300px";
+                return "";
             }
         }
     }
