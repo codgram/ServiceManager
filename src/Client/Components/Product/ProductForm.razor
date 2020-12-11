@@ -6,7 +6,7 @@
 
 <div class="row">
     <div class="col-md-4">
-        <div class="form">
+        <div class="form-group">
                 <label class="control-label">
                     Subcategory</label>
                     <InputSelect class ="form-control" @bind-Value="product.ProductSubcategoryId">
@@ -25,22 +25,22 @@
                     </InputSelect>
                 
             </div>
-        <div class="form-">
+        <div class="form-group">
             <label class="control-label">Product No</label>
             <InputText class="form-control" @bind-Value="@product.ProductNo" />
             <ValidationMessage For="@(() => product.ProductNo)" />
         </div>
-        <div class="form-">
+        <div class="form-group">
             <label class="control-label">Brand</label>
             <input class="form-control" @bind="@product.Brand" />
             <ValidationMessage For="@(() => product.Brand)" />
         </div>
-        <div class="form-">
+        <div class="form-group">
             <label class="control-label">Description</label>
             <input class="form-control" @bind="@product.Description" />
             <ValidationMessage For="@(() => product.Description)" />
         </div>
-        <div class="form-">
+        <div class="form-group">
             <label class="control-label">Size</label>
             <input class="form-control" @bind="@product.Size" />
             <ValidationMessage For="@(() => product.Size)" />
