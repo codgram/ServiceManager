@@ -7,29 +7,36 @@
 <div class="row">
     <div class="col-md-4">
         <div class="form-group">
-                <label class="control-label">
-                    Document Type</label>
-                    <InputSelect class ="form-control" @bind-Value="PurchaseHeader.VendorId">
-                        <option value="">Select ...</option>
-                        @if(Vendors == null) {
-                            <option>Loading product groups</option>
-                        }
-                        else if(Vendors.Length == 0) {
-                            <option>you need to create groups</option>
-                        }
-                        else {
-                            @foreach(var vendor in Vendors) {
-                            <option value="@vendor.VendorId">@vendor.Name</option>
-                            }
-                        }
-                        
-                    </InputSelect>
-                
-            </div>
+            <label class="control-label">Document Type</label>
+            <InputSelect class ="form-control" @bind-Value="PurchaseHeader.VendorId">
+                <option value="">Select ...</option>
+                @if(Vendors == null) {
+                    <option>Loading vendors</option>
+                }
+                else if(Vendors.Length == 0) {
+                    <option>you need to create vendor</option>
+                }
+                else {
+                    @foreach(var vendor in Vendors) {
+                    <option value="@vendor.VendorId">@vendor.Name</option>
+                    }
+                }
+            </InputSelect>
+        </div>
+        <div class="form-group">
+            <label class="control-label">Quantity</label>
+            <InputDate class="form-control" @bind-Value="@PurchaseHeader.OrderDate" />
+            <ValidationMessage For="@(() => PurchaseHeader.OrderDate)" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Quantity</label>
+            <InputDate class="form-control" @bind-Value="@PurchaseHeader.PostedDate" />
+            <ValidationMessage For="@(() => PurchaseHeader.PostedDate)" />
+        </div>
     </div>
 </div>
     
-    <button type="submit" class="btn btn-success">
+    <button type="submit" class="btn btn-success mt-3">
         @ButtonText
     </button>
 
@@ -41,5 +48,8 @@
     [Parameter] public Vendor[] Vendors { get; set; }
     [Parameter] public string ButtonText { get; set; } = "Save";
     [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+    [Parameter] public Company Company { get; set; }
+    [Parameter] public string companySlug { get; set; }
 
 }
