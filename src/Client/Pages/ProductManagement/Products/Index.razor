@@ -22,7 +22,9 @@ else
         <thead>
             <tr>
                 <th>Product No</th>
+                <th>Brand</th>
                 <th>Description</th>
+                <th>Size</th>
                 <th>Variations</th>
                 <th></th>
             </tr>
@@ -32,7 +34,9 @@ else
             {
                 <tr>
                     <td>@product.ProductNo</td>
+                    <td>@product.Brand</td>
                     <td>@product.Description</td>
+                    <td>@product.Size</td>
                     <td>@GetProductVariants(product.ProductId)</td>
                     <td>
                         <div class="btn-group">
