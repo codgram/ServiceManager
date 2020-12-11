@@ -32,7 +32,7 @@ namespace ServiceManager.Shared.Models.ProductManagement
         [Required]
         public string Size { get; set; }
 
-        public bool IsActice { get ; set; }
+        public bool IsActive { get ; set; }
 
     }
 }
