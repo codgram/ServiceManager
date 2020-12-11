@@ -19,6 +19,6 @@ namespace ServiceManager.Shared.Models
         public string CompanyId { get; set; }
         public Company Company { get; set; } 
         public string ServiceManagerUserId { get; set; } //Created by user
-
+        public bool IsActive { get; set; }
     }
 }
