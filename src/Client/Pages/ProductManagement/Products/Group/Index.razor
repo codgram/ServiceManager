@@ -43,7 +43,7 @@ else
                             <li><a class="dropdown-item" href="@companySlug/product/group/edit/@productGroup.ProductGroupId">Edit</a></li>                                                    
                             <li><a class="dropdown-item disabled" href="#">Details</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item disabled" @onclick="@(() => DeleteProductGroup(productGroup.ProductGroupId))">Delete</a></li>
+                            <li><a class="dropdown-item" @onclick="@(() => DeleteProductGroup(productGroup.ProductGroupId))">Delete</a></li>
                           </ul>
                         </div>
                     </td>
