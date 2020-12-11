@@ -29,7 +29,7 @@ namespace ServiceManager.Server.Controllers.Procurement
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PurchaseHeader>>> GetPurchaseHeader([FromQuery] string companyId)
         {
-            return await _context.PurchaseHeader.Include(p => p.Company).Where(p => p.CompanyId == companyId).ToListAsync();
+            return await _context.PurchaseHeader.Include(p => p.Company).Include(p => p.Vendor).Where(p => p.CompanyId == companyId).ToListAsync();
         }
 
         // GET: api/PurchaseHeader/5
@@ -102,12 +102,26 @@ namespace ServiceManager.Server.Controllers.Procurement
                 return NotFound();
             }
 
-            PurchaseLine line = await _context.PurchaseLine.FirstOrDefaultAsync(p => p.PurchaseHeaderId == purchaseHeader.PurchaseHeaderId);
+            // Delete only if the Purchase order is not posted
+            if (purchaseHeader.IsPosted == false)
+            {
+                var lines = await _context.PurchaseLine.Where(p => p.PurchaseHeaderId == purchaseHeader.PurchaseHeaderId).ToListAsync();
 
-            if(line == null) { 
+                if (lines != null)
+                {
+                    foreach (var item in lines)
+                    {
+                        _context.PurchaseLine.Remove(item);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
                 _context.PurchaseHeader.Remove(purchaseHeader);
                 await _context.SaveChangesAsync();
             }
+
+            
+            
             
 
             return purchaseHeader;
@@ -121,10 +135,10 @@ namespace ServiceManager.Server.Controllers.Procurement
         private async Task<string> SetPONo(string companyId)
         {
 
-            PurchaseHeader lastPurchaseOrder = await _context.PurchaseHeader.LastOrDefaultAsync(p => p.CompanyId == companyId);
+            PurchaseHeader lastPurchaseOrder = await _context.PurchaseHeader.OrderBy(p => p.PurchaseOrderNo).LastOrDefaultAsync(p => p.CompanyId == companyId);
             DocumentSetup purchaseHeaderSetup = await _context.DocumentSetup.FirstOrDefaultAsync(p => p.CompanyId == companyId && p.DocumentType == DocumentType.Purchase && p.Part == DocumentSetupPart.Prefix);
             string prefix = purchaseHeaderSetup.Content;
-            string year = DateTime.Now.Year.ToString().Split("", 2)[1]; //gets the last 2 characters from the year
+            string year = DateTime.Now.Year.ToString().Substring(DateTime.Now.Year.ToString().Length - 2); //gets the last 2 characters from the year
 
             if (lastPurchaseOrder == null)
             {
