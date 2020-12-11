@@ -4,6 +4,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ServiceManager.Shared.Models.SalesManagement
 {
+    public enum PaymentStatus { 
+        Pending,
+        Partial,
+        Paid
+    }
     public class SalesHeader
     { 
         [Key]
@@ -15,6 +20,9 @@ namespace ServiceManager.Shared.Models.SalesManagement
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime ModifiedOn { get; set; } = DateTime.Now;
+
+        public DateTime DeliveryDate { get; set; }
+        public DateTime PostedDate { get; set; }
         public string CompanyId { get; set; }
         public Company Company { get; set; }
 
@@ -22,7 +30,11 @@ namespace ServiceManager.Shared.Models.SalesManagement
         public string CustomerId { get; set; }
         public Customer Customer { get; set; }
 
-        public bool Posted { get; set; }
+        public bool IsShipped { get; set; }
+        
+        public bool IsPosted { get; set; }
+
+        public PaymentStatus PaymentStatus { get; set; }
 
 
     }
