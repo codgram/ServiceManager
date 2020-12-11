@@ -24,6 +24,8 @@ namespace ServiceManager.Shared.Models.Procurement
         public int LineNo { get; set; }
         public string ProductId { get; set; }
         public Product Product { get; set; }
+        public string VariantId { get; set; }
+        public Variant Variant { get; set; }
 
         [Column(TypeName = "decimal(18, 2)")]
         public decimal Quantity { get; set; }
