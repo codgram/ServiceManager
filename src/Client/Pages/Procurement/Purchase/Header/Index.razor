@@ -1,5 +1,6 @@
 @page "/{companySlug}/procurement/purchase/header"
 @inject Services.CompanyFilter CompanyFilter
+@inject Services.Style Style
 @inject IJSRuntime JsRuntime
 @inject HttpClient client
 
@@ -18,40 +19,34 @@ else if(PurchaseHeaders.Length == 0) {
 }
 else {
 
-
-
-    <div class="row mb-3">
-        <Card Title="PurchaseHeaders" Count="@PurchaseHeaders.Count().ToString()"/>
-    </div>
-
-
-
     <div class="table-responsive shadow p-2 rounded bg-white">
     <table class="table table-striped table-sm">
         <thead>
             <tr>
                 <th>Order No</th>
                 <th>Vendor</th>
+                <th>Lines</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
-            @foreach (PurchaseHeader PurchaseHeader in PurchaseHeaders)
+            @foreach (PurchaseHeader header in PurchaseHeaders)
             {
                 
                 <tr>
-                    <td>@PurchaseHeader.PurchaseOrderNo</td>
-                    <td>@PurchaseHeader.Vendor.Name</td>
+                    <td><a href="@companySlug/procurement/purchase/@header.PurchaseHeaderId/line">@header.PurchaseOrderNo</a> </td>
+                    <td>@header.Vendor.Name</td>
+                    <td>@GetLines(header.PurchaseHeaderId)</td>
                     <td>
                         <div class="btn-group">
                           <button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                             Action
                           </button>
-                          <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="@companySlug/procurement/Purchase/header/@PurchaseHeader.PurchaseHeaderId/edit">Edit</a></li>                                                    
+                          <ul class="dropdown-menu" style="height: @height;">
+                            <li><a class="dropdown-item" href="@companySlug/procurement/Purchase/header/@header.PurchaseHeaderId/edit">Edit</a></li>                                                    
                             <li><a class="dropdown-item disabled" href="#">Details</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" @onclick="@(() => DeletePurchaseHeader(PurchaseHeader.PurchaseHeaderId))">Delete</a></li>
+                            <li><a class="dropdown-item" @onclick="@(() => DeletePurchaseHeader(header.PurchaseHeaderId))">Delete</a></li>
                           </ul>
                         </div>
                     </td>
@@ -69,12 +64,14 @@ else {
 @code {
 
     [Parameter] public string companySlug { get; set; }
+    private string height { get; set; }
 
     private Company Company { get; set; }
 
     private PurchaseHeader[] PurchaseHeaders { get; set; }
 
     private PurchaseHeader PurchaseHeader { get; set; }
+    private PurchaseLine[] PurchaseLines { get; set; }
 
     protected override async Task OnInitializedAsync() {
         Company = await client.GetFromJsonAsync<Company>($"api/company/s?slug={companySlug}");
@@ -82,6 +79,9 @@ else {
         CompanyFilter.Slug = Company.Slug;
 
         PurchaseHeaders = await client.GetFromJsonAsync<PurchaseHeader[]>($"api/PurchaseHeader?companyId={Company.CompanyId}");
+        PurchaseLines = await client.GetFromJsonAsync<PurchaseLine[]>($"api/purchaseline?companyId={Company.CompanyId}");
+
+        height = Style.GetHeight(PurchaseHeaders.Count());
     }
 
     private async Task DeletePurchaseHeader(string PurchaseHeaderId) {
@@ -91,4 +91,8 @@ else {
             }
         await OnInitializedAsync();
     }
+
+    private int GetLines(string purchaseHeaderId) {
+            return PurchaseLines.Where(p => p.PurchaseHeaderId == purchaseHeaderId).Count();
+        }
 }
